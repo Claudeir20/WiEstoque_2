@@ -133,6 +133,8 @@ Sistema de estoque/
 └── README.md                        Documentação geral do projeto
 ```
 
+As regras de edição de materiais ficam em `Product.edit(name, quantity, reason)`: a entidade recusa cadastros arquivados, valida nome, saldo e motivo, identifica mudanças e cria o ajuste com os valores anteriores antes de alterar o estado. Quando nada muda, retorna `Optional.empty()`. O `ProductService` consulta o cadastro, confere a versão e a disponibilidade do nome, converte a quantidade recebida, salva o ajuste retornado e executa o flush. A entidade não utiliza repositories.
+
 A comunicação segue o fluxo: **navegador → frontend → API → PostgreSQL**. O banco armazena os cadastros, as movimentações e os ajustes. O frontend apresenta os dados e envia as operações; o backend aplica as regras e grava as alterações.
 
 ## Executar localmente sem Docker

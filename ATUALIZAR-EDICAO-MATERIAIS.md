@@ -2,6 +2,11 @@
 
 Esta atualização corresponde ao projeto Sistema de estoque e ao pacote estoque-sem-docker apresentado na conversa.
 
+## Regras de edição na entidade
+- Product.edit valida estado ativo, nome, quantidade e motivo, identifica mudanças e cria o registro de ajuste antes de alterar os valores.
+- O service mantém consultas, conferência de versão, duplicidade e persistência.
+- Esta mudança não exige uma nova migração ou mudança no frontend.
+
 ## Refatoração dos materiais
 - A edição envia a versão do cadastro e recebe a versão gravada após salvar.
 - Validação de formulário ativada no backend; quantidades fracionadas continuam sendo rejeitadas.
