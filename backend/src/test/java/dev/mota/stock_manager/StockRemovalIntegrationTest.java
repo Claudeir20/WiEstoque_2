@@ -67,7 +67,7 @@ class StockRemovalIntegrationTest {
         assertEquals(201, move("WITHDRAWAL", tech, productItem + "," + routerItem).statusCode());
         assertEquals(400, request("DELETE", "/routers/" + router, null).statusCode());
         assertEquals(400, request("POST", "/routers/" + router + "/archive", "{}").statusCode());
-        assertEquals(400, request("DELETE", "/products/" + product, null).statusCode());
+        assertEquals(409, request("DELETE", "/products/" + product, null).statusCode());
         assertEquals(200, request("POST", "/products/" + product + "/archive", "{}").statusCode());
         assertEquals(400, move("RETURN", tech, productItem).statusCode());
         assertEquals(400, request("POST", "/movements", "{\"type\":\"ENTRY\",\"items\":[" + productItem + "]}").statusCode());
