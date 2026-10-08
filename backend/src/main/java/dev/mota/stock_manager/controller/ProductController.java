@@ -4,6 +4,7 @@ package dev.mota.stock_manager.controller;
 import dev.mota.stock_manager.dto.CreateProductRequest;
 import dev.mota.stock_manager.dto.response.ProductResponse;
 import dev.mota.stock_manager.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,7 +51,7 @@ public class ProductController {
         return ResponseEntity.ok(java.util.Map.of("message", "Material arquivado. Histórico preservado."));
     }
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> update(@PathVariable UUID id, @jakarta.validation.Valid @RequestBody dev.mota.stock_manager.dto.UpdateProductRequest request) {
+    public ResponseEntity<ProductResponse> update(@PathVariable UUID id, @Valid @RequestBody dev.mota.stock_manager.dto.UpdateProductRequest request) {
         return ResponseEntity.ok(productService.update(id, request));
     }
     @GetMapping("/{id}/adjustments")
