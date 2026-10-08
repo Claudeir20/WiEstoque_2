@@ -49,9 +49,7 @@ public class Product {
 
     public static Product create(String name, int quantity, int minimumQuantity) {
 
-        if (name == null || name.isBlank()){
-            throw new IllegalArgumentException("name is required");
-        }
+        name = normalizeName(name);
         if (quantity < 0){
             throw new IllegalArgumentException("A quantidade inicial não pode ser negativa.");
         }
@@ -66,10 +64,15 @@ public class Product {
         );
     }
 
-    public void edit(String name, int quantity) {
-        ensureActive();
+    public static String normalizeName(String name) {
         if (name == null || name.isBlank() || name.strip().length() > 255)
             throw new IllegalArgumentException("Informe um nome com até 255 caracteres.");
+        return name.strip();
+    }
+
+    public void edit(String name, int quantity) {
+        ensureActive();
+        name = normalizeName(name);
         if (quantity < 0) throw new IllegalArgumentException("A quantidade não pode ser negativa.");
         this.name = name.strip(); this.quantity = quantity;
     }
