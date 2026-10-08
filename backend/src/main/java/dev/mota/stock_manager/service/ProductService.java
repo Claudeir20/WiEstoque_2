@@ -5,7 +5,6 @@ import dev.mota.stock_manager.dto.UpdateProductRequest;
 import dev.mota.stock_manager.dto.response.ProductAdjustmentResponse;
 import dev.mota.stock_manager.dto.response.ProductResponse;
 import dev.mota.stock_manager.entity.Product;
-import dev.mota.stock_manager.entity.ProductAdjustment;
 import dev.mota.stock_manager.exception.ConflictException;
 import dev.mota.stock_manager.exception.ResourceNotFoundException;
 import dev.mota.stock_manager.mapper.ProductMapper;
@@ -59,7 +58,6 @@ public class ProductService {
     @Transactional
     public ProductResponse update(UUID id, UpdateProductRequest request) {
         Product product = getProduct(id);
-        if (!product.isActive()) throw new ConflictException("Material arquivado não pode ser editado.");
 
         if (!Objects.equals(request.version(), product.getVersion()))
             throw new ConflictException("Material alterado. Atualize os dados antes de editar.");
@@ -72,23 +70,8 @@ public class ProductService {
             throw new IllegalArgumentException("Informe uma quantidade inteira entre 0 e 2147483647.");
         }
 
-        if (quantity < 0) throw new IllegalArgumentException("A quantidade não pode ser negativa.");
-        String reason = request.reason() == null ? "" : request.reason().strip();
-
-        if (reason.length() > 255) throw new IllegalArgumentException("O motivo deve ter até 255 caracteres.");
-        boolean nameChanged = !name.equals(product.getName());
-
-        boolean quantityChanged = quantity != product.getQuantity();
-
-        if (!nameChanged && !quantityChanged) return productMapper.toResponse(product);
-
-        if (quantityChanged && reason.isBlank()) throw new IllegalArgumentException("Informe o motivo do ajuste de estoque.");
-
-        if (nameChanged) assertNameAvailable(name, id);
-
-        adjustmentRepository.save(new ProductAdjustment(product, name, quantity,
-            reason.isBlank() ? "Correção do nome" : reason));
-        product.edit(name, quantity);
+        if (!name.equals(product.getName())) assertNameAvailable(name, id);
+        product.edit(name, quantity, request.reason()).ifPresent(adjustmentRepository::save);
         // Atualiza @Version antes de montar a resposta; o cliente recebe a versão gravada.
         productRepository.flush();
         return productMapper.toResponse(product);

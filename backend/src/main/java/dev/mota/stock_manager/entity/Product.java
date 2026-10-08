@@ -9,6 +9,8 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.Optional;
+import dev.mota.stock_manager.exception.ConflictException;
 
 @Entity
 @Getter
@@ -70,11 +72,27 @@ public class Product {
         return name.strip();
     }
 
-    public void edit(String name, int quantity) {
-        ensureActive();
-        name = normalizeName(name);
+    public Optional<ProductAdjustment> edit(String name, int quantity, String reason) {
+        if (!active) throw new ConflictException("Material arquivado não pode ser editado.");
+
+        String newName = normalizeName(name);
         if (quantity < 0) throw new IllegalArgumentException("A quantidade não pode ser negativa.");
-        this.name = name.strip(); this.quantity = quantity;
+        String normalizedReason = reason == null ? "" : reason.strip();
+
+        if (normalizedReason.length() > 255)
+            throw new IllegalArgumentException("O motivo deve ter até 255 caracteres.");
+
+        boolean nameChanged = !newName.equals(this.name);
+        boolean quantityChanged = quantity != this.quantity;
+        if (!nameChanged && !quantityChanged) return Optional.empty();
+        if (quantityChanged && normalizedReason.isBlank())
+            throw new IllegalArgumentException("Informe o motivo do ajuste de estoque.");
+
+        ProductAdjustment adjustment = new ProductAdjustment(this, newName, quantity,
+            normalizedReason.isBlank() ? "Correção do nome" : normalizedReason);
+        this.name = newName;
+        this.quantity = quantity;
+        return Optional.of(adjustment);
     }
 
     public void ensureRemovable() {
