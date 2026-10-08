@@ -50,11 +50,11 @@ public class ProductController {
         return ResponseEntity.ok(java.util.Map.of("message", "Material arquivado. Histórico preservado."));
     }
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> update(@PathVariable UUID id, @RequestBody dev.mota.stock_manager.dto.UpdateProductRequest request) {
+    public ResponseEntity<ProductResponse> update(@PathVariable UUID id, @jakarta.validation.Valid @RequestBody dev.mota.stock_manager.dto.UpdateProductRequest request) {
         return ResponseEntity.ok(productService.update(id, request));
     }
     @GetMapping("/{id}/adjustments")
-    public java.util.List<dev.mota.stock_manager.entity.ProductAdjustment> adjustments(@PathVariable UUID id) {
+    public java.util.List<dev.mota.stock_manager.dto.response.ProductAdjustmentResponse> adjustments(@PathVariable UUID id) {
         return productService.adjustments(id);
     }
 }
