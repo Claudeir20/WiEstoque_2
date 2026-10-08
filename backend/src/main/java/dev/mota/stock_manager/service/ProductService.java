@@ -22,10 +22,10 @@ public class ProductService {
     private final MovementItemRepository movementItemRepository;
 
     public ProductResponse createProduct(CreateProductRequest request) {
-
-       if (productRepository.existsByName(request.name())){
-           throw new IllegalArgumentException("Product already exists");
-       }
+        Product product = Product.create(request.name(), request.quantity(), request.minimumQuantity());
+        assertNameAvailable(product.getName(), null);
+        return productMapper.toResponse(productRepository.saveAndFlush(product));
+    }
 
        Product product = Product.create(
                request.name(),
