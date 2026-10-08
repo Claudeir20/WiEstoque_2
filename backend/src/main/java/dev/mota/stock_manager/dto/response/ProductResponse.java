@@ -6,6 +6,7 @@ import java.util.UUID;
 
 public record ProductResponse(
         UUID id,
+        long version,
         String name,
         int quantity,
         int minimumQuantity,
