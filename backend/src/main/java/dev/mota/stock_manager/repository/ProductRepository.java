@@ -17,4 +17,6 @@ public interface ProductRepository
     boolean existsByNameIgnoreCaseAndIdNot(String name, UUID id);
 
     boolean existsByName(String name);
+
+    boolean existsByNameIgnoreCase(String name);
 }
