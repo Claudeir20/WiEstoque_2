@@ -1645,7 +1645,7 @@ function EditProductDialog({ product, close, saved }: { product: Product; close:
     if (reason.trim().length > 255) { setError("O motivo deve ter até 255 caracteres."); return }
     pending.current = true; setSaving(true); setError("")
     try {
-      await api(`/products/${product.id}`, { name: name.trim(), quantity: value, reason: reason.trim(), expectedName: product.name, expectedQuantity: product.quantity }, "PUT")
+      await api(`/products/${product.id}`, { name: name.trim(), quantity: value, reason: reason.trim(), version: product.version }, "PUT")
       setDone(true)
       try { await saved(); close() } catch { setError("Alteração salva. Feche e use Atualizar dados para atualizar a tela.") }
     } catch (e) { setError(e instanceof Error ? e.message : "Não foi possível salvar.") }

@@ -1,5 +1,6 @@
 export type Product = {
   id: string
+  version: number
   name: string
   quantity: number
   hasAdjustments?: boolean
