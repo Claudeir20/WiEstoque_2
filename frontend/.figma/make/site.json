@@ -1,0 +1,11 @@
+{
+  "title": "WiEstoque",
+  "description": "Manage inventory efficiently with this user-friendly stock management system designed for businesses to track products, streamline operations, and enhance productivity.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

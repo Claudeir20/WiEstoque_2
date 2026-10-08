@@ -1,0 +1,4 @@
+ALTER TABLE movements ALTER COLUMN technician_id DROP NOT NULL;
+ALTER TABLE movements ADD CONSTRAINT ck_movements_technician CHECK (type = 'ENTRY' OR technician_id IS NOT NULL);
+ALTER TABLE products ADD COLUMN version BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE routers ADD COLUMN version BIGINT NOT NULL DEFAULT 0;

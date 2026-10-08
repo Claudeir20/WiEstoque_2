@@ -1,0 +1,5 @@
+.env
+backups/
+implantacao/dados-iniciais.sql
+implantacao/dados-iniciais-manifesto.json
+pacote-empresa.zip
