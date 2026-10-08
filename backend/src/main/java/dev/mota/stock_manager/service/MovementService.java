@@ -40,6 +40,7 @@ public class MovementService {
         if (request.technicianId() != null) {
             technician = technicianRepository.findById(request.technicianId())
                 .orElseThrow(() -> new IllegalArgumentException("Técnico não encontrado."));
+
             if (!technician.isActive()) throw new IllegalArgumentException("Técnico inativo.");
         } else if (request.type() != MovementType.ENTRY) {
             throw new IllegalArgumentException("Selecione um técnico.");

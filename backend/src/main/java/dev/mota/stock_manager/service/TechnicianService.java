@@ -5,6 +5,7 @@ import dev.mota.stock_manager.dto.response.TechnicianResponse;
 import dev.mota.stock_manager.entity.Technician;
 import dev.mota.stock_manager.mapper.TechnicianMapper;
 import dev.mota.stock_manager.repository.TechnicianRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,10 +35,11 @@ public class TechnicianService {
 
         return technicianMapper.toResponse(savedTechnician);
     }
+
     public java.util.List<TechnicianResponse> findAll() {
         return technicianRepository.findAll(org.springframework.data.domain.Sort.by("name")).stream().map(technicianMapper::toResponse).toList();
     }
-    @jakarta.transaction.Transactional
+    @Transactional
     public TechnicianResponse update(java.util.UUID id, dev.mota.stock_manager.dto.UpdateTechnicianRequest request) {
         Technician technician = find(id);
         if (!java.util.Objects.equals(request.expectedName(), technician.getName())
@@ -50,7 +52,7 @@ public class TechnicianService {
         return technicianMapper.toResponse(technician);
     }
 
-    @jakarta.transaction.Transactional
+    @Transactional
     public void delete(java.util.UUID id) {
         Technician technician = find(id);
         if (movementRepository.existsByTechnicianId(id))
@@ -58,7 +60,7 @@ public class TechnicianService {
         technicianRepository.delete(technician);
     }
 
-    @jakarta.transaction.Transactional
+    @Transactional
     public void archive(java.util.UUID id) {
         Technician technician = find(id);
         if (!technician.isActive()) throw new IllegalArgumentException("Técnico já arquivado.");
