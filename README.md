@@ -36,7 +36,7 @@ O saldo depende dos registros feitos pelos usuários. O sistema auxilia o contro
 - Edição do nome e da quantidade atual.
 - Motivo obrigatório quando a quantidade é alterada.
 - Histórico dos ajustes dentro da janela **Editar**, com data, nome anterior e novo, saldo anterior e novo, diferença e motivo.
-- Exportação do estoque em CSV.
+- Exportação do estoque filtrado em Excel (.xlsx) ou CSV, com cabeçalhos em português e sem IDs internos.
 - Exclusão de materiais sem movimentações ou ajustes, desde que o saldo seja zero.
 - Arquivamento de materiais com histórico, também exigindo saldo zero.
 
@@ -76,7 +76,9 @@ Corrigir o nome mantém o mesmo identificador do técnico. As consultas das movi
 | Devolução | Aumenta o saldo do material ou devolve o roteador ao estoque. | Técnico obrigatório. |
 | Entrada | Aumenta o saldo de materiais existentes. | Dispensa técnico. |
 
-Uma movimentação pode conter vários itens. A busca aceita o nome do material e os identificadores do roteador. Correspondências exatas têm prioridade; quando há mais de um resultado possível, o sistema pede um termo mais específico para evitar escolher o cadastro errado.
+Uma movimentação pode conter vários itens. A busca apresenta uma lista com nome, saldo e situação dos materiais e roteadores. É possível escolher pelo clique ou pelas setas e Enter. Correspondências exatas têm prioridade, incluindo MAC lido sem separadores. Resultados indisponíveis ficam desabilitados. O Enter adiciona uma correspondência única e mantém o foco para a próxima leitura; buscas ambíguas exigem seleção.
+
+No cadastro de roteadores, o Enter avança entre os campos e, ao chegar ao último, direciona o foco ao botão de cadastro. Assim, o final da leitura não envia o formulário automaticamente.
 
 O backend valida todos os itens antes de concluir a operação. Se uma regra falhar, a transação é revertida e a movimentação não fica parcialmente registrada.
 
@@ -85,9 +87,10 @@ O backend valida todos os itens antes de concluir a operação. Se uma regra fal
 - Filtros por técnico, data inicial, data final, material e tipo de movimentação.
 - O seletor de material apresenta somente materiais.
 - A opção **Todos os itens** pode incluir roteadores nos resultados e no resumo.
-- Lista de movimentações com a data exibida sem horário.
+- Lista de movimentações com data sem horário, itens separados e quantidades destacadas.
+- Filtros ativos visíveis, com remoção individual; Limpar filtros restaura todos os resultados.
 - Resumo por técnico e item, com retiradas, devoluções, entradas e retirado líquido.
-- Exportação da lista filtrada e do resumo em CSV.
+- Exportação da lista filtrada e do resumo em Excel (.xlsx) ou CSV. A exportação detalhada apresenta uma linha por item, separando categoria, nome e quantidade.
 
 O filtro padrão é **Saída**. Para comparar retiradas e devoluções, selecione **Todos os tipos**. As datas inicial e final incluem os dias completos.
 
@@ -313,14 +316,25 @@ pnpm build
 
 Os testes do backend usam H2 temporário em modo PostgreSQL e não alteram o banco operacional. Cobrem cadastro, movimentação, reversão de transações, normalização de identificadores, edição, validações, exclusão e arquivamento.
 
-Os testes do frontend cobrem filtros e resumos do histórico e a formatação dos identificadores. O build verifica a geração dos arquivos de distribuição. Na verificação realizada, os tipos do código `src` passaram; a checagem completa `pnpm exec tsc --noEmit` encontrou erros preexistentes nos tipos dos plugins de `vite.config.ts`, embora o build tenha concluído.
+Os testes do frontend cobrem filtros e resumos do histórico, formatação dos identificadores, busca e disponibilidade dos candidatos e a exportação CSV/Excel com acentos e números preservados. O build verifica a geração dos arquivos de distribuição. Na verificação realizada, os tipos do código `src` passaram; a checagem completa `pnpm exec tsc --noEmit` encontrou erros preexistentes nos tipos dos plugins de `vite.config.ts`, embora o build tenha concluído.
 
 ## Escopo atual
 
 - O sistema não possui login, perfis de acesso ou identificação do usuário que fez um ajuste.
 - Não existe sincronização automática entre computadores.
 - A instalação sem Docker descrita utiliza o servidor de desenvolvimento do Vite e a execução do backend pelo Maven ou IntelliJ.
-- Não há tela de edição de roteadores, reativação de cadastros arquivados, restauração de backup ou importação contínua de planilhas.
+- Não há tela de edição de roteadores, reativação de roteadores arquivados, restauração de backup ou importação contínua de planilhas.
 - Publicar o sistema na internet exige preparar autenticação, controle de acesso, HTTPS e a configuração do encaminhamento da API.
 
 O WiEstoque foi pensado inicialmente para a operação local do estoque da WiNET. Sua proposta é manter o saldo consultável, os equipamentos identificados e as movimentações rastreáveis, com correções registradas e preservação do histórico.
+
+
+## Painel, consulta e reativação
+
+O painel inicial apresenta materiais abaixo ou no estoque mínimo, roteadores disponíveis e as cinco movimentações mais recentes. Em nova movimentação, a quantidade dos materiais pode ser digitada diretamente; são aceitos apenas inteiros positivos e, nas saídas, o saldo disponível é o limite. Roteadores continuam com quantidade fixa de uma unidade.
+
+Na devolução, ao selecionar o técnico, aparecem os roteadores fora do estoque cuja última movimentação é uma saída vinculada a ele. Essa consulta depende do histórico: equipamentos sem saída identificada ou com registros conflitantes são informados como sem técnico identificado e continuam acessíveis pela busca.
+
+Roteadores têm filtros de modelo e situação e busca por patrimônio, série, modelo ou MAC, inclusive sem separadores. As tabelas de materiais, roteadores e as duas tabelas do histórico têm páginas de 20, 50 ou 100 registros. A paginação ocorre no frontend; as exportações incluem todos os resultados filtrados.
+
+Materiais arquivados aparecem na opção Arquivados do estoque e podem ser reativados. Técnicos inativos também têm botão Reativar. O mesmo identificador e o histórico são preservados, sem recriar cadastros ou ajustar saldos. GET /products mantém a lista de ativos por padrão; includeArchived=true inclui arquivados. POST /products/{id}/reactivate e POST /technicians/{id}/reactivate reativam o cadastro e rejeitam um cadastro já ativo. Estas melhorias não exigem uma nova migração.

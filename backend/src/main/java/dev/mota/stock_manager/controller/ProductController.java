@@ -35,8 +35,8 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<java.util.List<ProductResponse>> findAll() {
-        return ResponseEntity.ok(productService.findAll());
+    public ResponseEntity<java.util.List<ProductResponse>> findAll(@RequestParam(defaultValue = "false") boolean includeArchived) {
+        return ResponseEntity.ok(productService.findAll(includeArchived));
     }
 
     @DeleteMapping("/{id}")
@@ -57,5 +57,10 @@ public class ProductController {
     @GetMapping("/{id}/adjustments")
     public java.util.List<dev.mota.stock_manager.dto.response.ProductAdjustmentResponse> adjustments(@PathVariable UUID id) {
         return productService.adjustments(id);
+    }
+    @PostMapping("/{id}/reactivate")
+    public java.util.Map<String, String> reactivate(@PathVariable UUID id) {
+        productService.reactivate(id);
+        return java.util.Map.of("message", "Cadastro reativado. Histórico preservado.");
     }
 }

@@ -111,4 +111,14 @@ class ProductEditingIntegrationTest {
         var duplicate=request("POST","/products","{\"name\":\" versão \",\"quantity\":0,\"minimumQuantity\":1}");
         assertEquals(409,duplicate.statusCode());
     }
+
+    @Test void reactivationRestoresTheSameMaterialAndDefaultListStaysActiveOnly() throws Exception {
+        String id = product("Reativação", 0);
+        assertEquals(200, request("POST", "/products/"+id+"/archive", "{}").statusCode());
+        assertFalse(request("GET", "/products", null).body().contains(id));
+        assertTrue(request("GET", "/products?includeArchived=true", null).body().contains(id));
+        assertEquals(200, request("POST", "/products/"+id+"/reactivate", "{}").statusCode());
+        assertTrue(request("GET", "/products", null).body().contains(id));
+        assertEquals(409, request("POST", "/products/"+id+"/reactivate", "{}").statusCode());
+    }
 }

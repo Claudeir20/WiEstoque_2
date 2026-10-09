@@ -52,4 +52,9 @@ public class TechnicianController {
         technicianService.archive(id);
         return java.util.Map.of("message", "Técnico arquivado. Histórico preservado.");
     }
+    @PostMapping("/{id}/reactivate")
+    public java.util.Map<String, String> reactivate(@PathVariable UUID id) {
+        technicianService.reactivate(id);
+        return java.util.Map.of("message", "Cadastro reativado. Histórico preservado.");
+    }
 }

@@ -70,4 +70,6 @@ public class TechnicianService {
     private Technician find(java.util.UUID id) {
         return technicianRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Técnico não encontrado."));
     }
+    @Transactional
+    public void reactivate(java.util.UUID id) { find(id).reactivate(); }
 }

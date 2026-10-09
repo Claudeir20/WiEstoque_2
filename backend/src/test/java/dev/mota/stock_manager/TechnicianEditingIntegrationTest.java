@@ -62,5 +62,10 @@ class TechnicianEditingIntegrationTest {
         assertEquals(400,request("POST","/movements",movement).statusCode());
         assertTrue(request("GET","/movements",null).body().contains(id));
         assertEquals(400,request("POST","/technicians/"+id+"/archive","{}").statusCode());
+        assertEquals(200,request("POST","/technicians/"+id+"/reactivate","{}").statusCode());
+        assertEquals(201,request("POST","/movements",movement).statusCode());
+        assertTrue(request("GET","/movements",null).body().contains(id));
+        assertEquals(409,request("POST","/technicians/"+id+"/reactivate","{}").statusCode());
+
     }
 }

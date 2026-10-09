@@ -68,4 +68,8 @@ public class Technician {
     public void deactivate() {
         this.active = false;
     }
+    public void reactivate() {
+        if (active) throw new dev.mota.stock_manager.exception.ConflictException("Técnico já está ativo.");
+        active = true;
+    }
 }

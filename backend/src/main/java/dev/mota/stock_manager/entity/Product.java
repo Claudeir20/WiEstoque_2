@@ -131,4 +131,8 @@ public class Product {
         this.quantity -= quantity;
     }
 
+    public void reactivate() {
+        if (active) throw new dev.mota.stock_manager.exception.ConflictException("Material já está ativo.");
+        active = true;
+    }
 }

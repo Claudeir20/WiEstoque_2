@@ -37,8 +37,12 @@ public class ProductService {
     }
 
     public List<ProductResponse> findAll() {
+        return findAll(false);
+    }
+
+    public List<ProductResponse> findAll(boolean includeArchived) {
         return productRepository.findAll(Sort.by("name")).stream()
-            .filter(Product::isActive).map(productMapper::toResponse).toList();
+            .filter(p -> includeArchived || p.isActive()).map(productMapper::toResponse).toList();
     }
 
     @Transactional
@@ -92,4 +96,6 @@ public class ProductService {
             : productRepository.existsByNameIgnoreCaseAndIdNot(name, excludeId);
         if (taken) throw new ConflictException("Já existe um material com esse nome.");
     }
+    @Transactional
+    public void reactivate(java.util.UUID id) { getProduct(id).reactivate(); }
 }
