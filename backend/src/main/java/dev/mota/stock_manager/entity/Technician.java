@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.UUID;
+import dev.mota.stock_manager.exception.ConflictException;
 
 @Entity
 @Getter
@@ -40,13 +41,13 @@ public class Technician {
 
         if (name == null || name.isBlank() || name.strip().length() > 255) {
             throw new IllegalArgumentException(
-                    "Name is required"
+                    "Informe o nome do técnico."
             );
         }
 
         if (sector == null || sector.isBlank() || sector.strip().length() > 255) {
             throw new IllegalArgumentException(
-                    "Sector is required"
+                    "Informe o setor do técnico."
             );
         }
 
@@ -57,7 +58,7 @@ public class Technician {
     }
 
     public void edit(String name, String sector) {
-        if (!active) throw new IllegalArgumentException("Técnico arquivado não pode ser editado.");
+        if (!active) throw new ConflictException("Técnico arquivado não pode ser editado.");
         if (name == null || name.isBlank() || name.strip().length() > 255)
             throw new IllegalArgumentException("Informe um nome com até 255 caracteres.");
         if (sector == null || sector.isBlank() || sector.strip().length() > 255)
@@ -69,7 +70,7 @@ public class Technician {
         this.active = false;
     }
     public void reactivate() {
-        if (active) throw new dev.mota.stock_manager.exception.ConflictException("Técnico já está ativo.");
+        if (active) throw new ConflictException("Técnico já está ativo.");
         active = true;
     }
 }

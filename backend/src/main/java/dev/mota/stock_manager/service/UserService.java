@@ -13,8 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Locale;
+import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 
-@org.springframework.validation.annotation.Validated
+@Validated
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -24,7 +26,7 @@ public class UserService {
     private final UserMapper userMapper;
 
     @Transactional
-    public UserResponse createUser(@jakarta.validation.Valid CreateUserRequest request) {
+    public UserResponse createUser(@Valid CreateUserRequest request) {
         String email = request.email().trim().toLowerCase(Locale.ROOT);
 
         if (userRepository.existsByEmail(email)) {

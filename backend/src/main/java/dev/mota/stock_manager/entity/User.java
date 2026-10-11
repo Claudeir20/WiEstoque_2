@@ -7,10 +7,11 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 
 import java.util.UUID;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Getter
-@Table(name = "users", uniqueConstraints = @jakarta.persistence.UniqueConstraint(name = "uk_users_email", columnNames = "email"))
+@Table(name = "users", uniqueConstraints = @UniqueConstraint(name = "uk_users_email", columnNames = "email"))
 public class User {
 
     @Id
@@ -39,13 +40,13 @@ public class User {
     public static User create(String name, String email, String password) {
 
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Name is required");
+            throw new IllegalArgumentException("Informe o nome.");
         }
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("Email is required");
+            throw new IllegalArgumentException("Informe o e-mail.");
         }
         if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("Password is required");
+            throw new IllegalArgumentException("Informe a senha.");
         }
 
         return new User(name, email, password);
@@ -56,13 +57,13 @@ public class User {
             String name, String email, String passwordHash
     ){
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Name is required");
+            throw new IllegalArgumentException("Informe o nome.");
         }
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("Email is required");
+            throw new IllegalArgumentException("Informe o e-mail.");
         }
         if (passwordHash == null || passwordHash.isBlank()) {
-            throw new IllegalArgumentException("Password hash is required");
+            throw new IllegalArgumentException("Informe a senha.");
         }
 
         User user = create(name, email, passwordHash);

@@ -11,13 +11,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.Optional;
 import dev.mota.stock_manager.exception.ConflictException;
+import jakarta.persistence.Version;
 
 @Entity
 @Getter
 @Table(name = "products")
 public class Product {
 
-    @jakarta.persistence.Version
+    @Version
     private long version;
 
     @Id
@@ -56,7 +57,7 @@ public class Product {
             throw new IllegalArgumentException("A quantidade inicial não pode ser negativa.");
         }
         if (minimumQuantity <= 0){
-            throw new IllegalArgumentException("minimumQuantity is required");
+            throw new IllegalArgumentException("Informe um estoque mínimo maior que zero.");
         }
 
         return new Product(
@@ -96,7 +97,7 @@ public class Product {
     }
 
     public void ensureRemovable() {
-        if (!active) throw new IllegalArgumentException("Material já arquivado.");
+        if (!active) throw new ConflictException("Material já arquivado.");
         if (quantity != 0) {
             throw new IllegalArgumentException("O saldo do material deve ser zero para excluir ou arquivar.");
         }
@@ -114,7 +115,7 @@ public class Product {
     public void addQuantity(int quantity){
         ensureActive();
         if (quantity <= 0){
-            throw new IllegalArgumentException("Quantity must be greater than 0");
+            throw new IllegalArgumentException("A quantidade deve ser maior que zero.");
         }
         this.quantity += quantity;
     }
@@ -122,17 +123,17 @@ public class Product {
     public void subtractQuantity(int quantity){
         ensureActive();
         if (quantity <= 0){
-            throw new IllegalArgumentException("Quantity must be greater than 0");
+            throw new IllegalArgumentException("A quantidade deve ser maior que zero.");
         }
 
         if (quantity > this.quantity){
-            throw new IllegalArgumentException("Insufficient stock");
+            throw new IllegalArgumentException("Saldo insuficiente de " + name + ". Disponível: " + this.quantity + ".");
         }
         this.quantity -= quantity;
     }
 
     public void reactivate() {
-        if (active) throw new dev.mota.stock_manager.exception.ConflictException("Material já está ativo.");
+        if (active) throw new ConflictException("Material já está ativo.");
         active = true;
     }
 }

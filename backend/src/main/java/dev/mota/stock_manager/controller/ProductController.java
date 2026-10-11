@@ -14,6 +14,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.UUID;
+import dev.mota.stock_manager.dto.UpdateProductRequest;
+import dev.mota.stock_manager.dto.response.ProductAdjustmentResponse;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/products")
@@ -35,32 +39,32 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<java.util.List<ProductResponse>> findAll(@RequestParam(defaultValue = "false") boolean includeArchived) {
+    public ResponseEntity<List<ProductResponse>> findAll(@RequestParam(defaultValue = "false") boolean includeArchived) {
         return ResponseEntity.ok(productService.findAll(includeArchived));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<java.util.Map<String, String>> delete(@PathVariable UUID id) {
+    public ResponseEntity<Map<String, String>> delete(@PathVariable UUID id) {
         productService.delete(id);
-        return ResponseEntity.ok(java.util.Map.of("message", "Material excluído."));
+        return ResponseEntity.ok(Map.of("message", "Material excluído."));
     }
 
     @PostMapping("/{id}/archive")
-    public ResponseEntity<java.util.Map<String, String>> archive(@PathVariable UUID id) {
+    public ResponseEntity<Map<String, String>> archive(@PathVariable UUID id) {
         productService.archive(id);
-        return ResponseEntity.ok(java.util.Map.of("message", "Material arquivado. Histórico preservado."));
+        return ResponseEntity.ok(Map.of("message", "Material arquivado. Histórico preservado."));
     }
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> update(@PathVariable UUID id, @Valid @RequestBody dev.mota.stock_manager.dto.UpdateProductRequest request) {
+    public ResponseEntity<ProductResponse> update(@PathVariable UUID id, @Valid @RequestBody UpdateProductRequest request) {
         return ResponseEntity.ok(productService.update(id, request));
     }
     @GetMapping("/{id}/adjustments")
-    public java.util.List<dev.mota.stock_manager.dto.response.ProductAdjustmentResponse> adjustments(@PathVariable UUID id) {
+    public List<ProductAdjustmentResponse> adjustments(@PathVariable UUID id) {
         return productService.adjustments(id);
     }
     @PostMapping("/{id}/reactivate")
-    public java.util.Map<String, String> reactivate(@PathVariable UUID id) {
+    public Map<String, String> reactivate(@PathVariable UUID id) {
         productService.reactivate(id);
-        return java.util.Map.of("message", "Cadastro reativado. Histórico preservado.");
+        return Map.of("message", "Cadastro reativado. Histórico preservado.");
     }
 }

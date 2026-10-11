@@ -11,9 +11,14 @@ import dev.mota.stock_manager.repository.MovementRepository;
 import dev.mota.stock_manager.repository.ProductRepository;
 import dev.mota.stock_manager.repository.RouterRepository;
 import dev.mota.stock_manager.repository.TechnicianRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.Sort;
 
 @Service
 @RequiredArgsConstructor
@@ -64,24 +69,24 @@ public class MovementService {
         if (item == null || item.type() == null) throw new IllegalArgumentException("Tipo de item obrigatório.");
         switch (item.type()){
             case PRODUCT -> {
-                if (item.productId() == null || item.routerId() != null) throw new IllegalArgumentException("Produto inválido.");
+                if (item.productId() == null || item.routerId() != null) throw new IllegalArgumentException("Material inválido.");
                 Product product = productRepository.findById(item.productId())
-                        .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+                        .orElseThrow(() -> new IllegalArgumentException("Material não encontrado."));
                 movement.addProduct(product, item.quantity());
             }
             case ROUTER -> {
                 if (item.routerId() == null || item.productId() != null || item.quantity() != 1) throw new IllegalArgumentException("Roteadores devem ter quantidade 1.");
                 Router router = routerRepository.findById(item.routerId())
-                        .orElseThrow(() -> new IllegalArgumentException("Router not found"));
+                        .orElseThrow(() -> new IllegalArgumentException("Roteador não encontrado."));
                 movement.addRouter(router, item.clientCode());
             }
         }
     }
-    @Transactional
-    public java.util.List<MovementResponse> findAll() {
-        java.util.Map<java.util.UUID, String> names = technicianRepository.findAll().stream()
-            .collect(java.util.stream.Collectors.toMap(Technician::getId, Technician::getName));
-        return movementRepository.findAll(org.springframework.data.domain.Sort.by("date").descending()).stream()
+    @Transactional(readOnly = true)
+    public List<MovementResponse> findAll() {
+        Map<UUID, String> names = technicianRepository.findAll().stream()
+            .collect(Collectors.toMap(Technician::getId, Technician::getName));
+        return movementRepository.findAll(Sort.by("date").descending()).stream()
             .map(m -> movementMapper.toResponse(m, m.getTechnicianId() == null ? "Entrada de estoque" : names.getOrDefault(m.getTechnicianId(), "Técnico"))).toList();
     }
 }

@@ -3,11 +3,12 @@ package dev.mota.stock_manager.mapper;
 import dev.mota.stock_manager.dto.response.ProductResponse;
 import dev.mota.stock_manager.entity.Product;
 import org.springframework.stereotype.Component;
+import dev.mota.stock_manager.repository.ProductAdjustmentRepository;
 
 @Component
 @lombok.RequiredArgsConstructor
 public class ProductMapper {
-    private final dev.mota.stock_manager.repository.ProductAdjustmentRepository adjustments;
+    private final ProductAdjustmentRepository adjustments;
 
     public  ProductResponse toResponse(Product product) {
         return new ProductResponse(

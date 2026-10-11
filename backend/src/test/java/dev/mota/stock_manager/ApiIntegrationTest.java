@@ -55,8 +55,8 @@ class ApiIntegrationTest {
         assertEquals(201, response.statusCode(), response.body());
         assertTrue(response.body().contains("\"serialNumber\":\"SN-FORMAT\""));
         assertTrue(response.body().contains("\"mac\":\"AA:BB:CC:DD:12:34\""));
-        assertEquals(400, request("/routers", body.replace("PAT-FORMAT", "PAT-DUP-SERIAL").replace("aabbccdd1234", "aabbccdd5678")).statusCode());
-        assertEquals(400, request("/routers", body.replace("PAT-FORMAT", "PAT-DUP-MAC").replace("sn-format", "sn-another").replace("aabbccdd1234", "aa-bb-cc-dd-12-34")).statusCode());
+        assertEquals(409, request("/routers", body.replace("PAT-FORMAT", "PAT-DUP-SERIAL").replace("aabbccdd1234", "aabbccdd5678")).statusCode());
+        assertEquals(409, request("/routers", body.replace("PAT-FORMAT", "PAT-DUP-MAC").replace("sn-format", "sn-another").replace("aabbccdd1234", "aa-bb-cc-dd-12-34")).statusCode());
         assertEquals(400, request("/routers", body.replace("PAT-FORMAT", "PAT-INVALID").replace("sn-format", "sn-invalid").replace("aabbccdd1234", "D4D6B8N9S354A")).statusCode());
     }
 }

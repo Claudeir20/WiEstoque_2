@@ -7,6 +7,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 public class SecurityConfig {
@@ -21,7 +22,7 @@ public class SecurityConfig {
             throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/", "/index.html", "/assets/**", "/wiestoque.svg", "/robots.txt", "/favicon.ico").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/", "/index.html", "/assets/**", "/wiestoque.svg", "/robots.txt", "/favicon.ico").permitAll()
                         .requestMatchers("/auth/csrf").permitAll()
 
                         // Ele exige que o usuário tenha a autoridade ROLE_ADMIN para acessar essas rotas.

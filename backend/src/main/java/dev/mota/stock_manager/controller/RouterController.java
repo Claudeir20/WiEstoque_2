@@ -15,6 +15,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.UUID;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/routers")
@@ -36,19 +38,19 @@ public class RouterController {
     }
 
     @GetMapping
-    public ResponseEntity<java.util.List<RouterResponse>> findAll() {
+    public ResponseEntity<List<RouterResponse>> findAll() {
         return ResponseEntity.ok(routerService.findAll());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<java.util.Map<String, String>> delete(@PathVariable UUID id) {
+    public ResponseEntity<Map<String, String>> delete(@PathVariable UUID id) {
         routerService.delete(id);
-        return ResponseEntity.ok(java.util.Map.of("message", "Roteador excluído."));
+        return ResponseEntity.ok(Map.of("message", "Roteador excluído."));
     }
 
     @PostMapping("/{id}/archive")
-    public ResponseEntity<java.util.Map<String, String>> archive(@PathVariable UUID id) {
+    public ResponseEntity<Map<String, String>> archive(@PathVariable UUID id) {
         routerService.archive(id);
-        return ResponseEntity.ok(java.util.Map.of("message", "Roteador arquivado. Histórico preservado."));
+        return ResponseEntity.ok(Map.of("message", "Roteador arquivado. Histórico preservado."));
     }
 }

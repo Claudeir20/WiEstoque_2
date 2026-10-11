@@ -97,5 +97,5 @@ public class ProductService {
         if (taken) throw new ConflictException("Já existe um material com esse nome.");
     }
     @Transactional
-    public void reactivate(java.util.UUID id) { getProduct(id).reactivate(); }
+    public void reactivate(UUID id) { getProduct(id).reactivate(); }
 }

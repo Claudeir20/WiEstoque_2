@@ -56,7 +56,7 @@ class StockRemovalIntegrationTest {
         String unused = router("UNUSED", "001122334455");
         assertEquals(200, request("DELETE", "/routers/" + unused, null).statusCode());
         assertFalse(request("GET", "/routers", null).body().contains(unused));
-        assertEquals(400, request("DELETE", "/routers/" + unused, null).statusCode());
+        assertEquals(404, request("DELETE", "/routers/" + unused, null).statusCode());
     }
 
     @Test
@@ -74,10 +74,10 @@ class StockRemovalIntegrationTest {
         assertEquals(400, move("RETURN", tech, productItem).statusCode());
         assertEquals(400, request("POST", "/movements", "{\"type\":\"ENTRY\",\"items\":[" + productItem + "]}").statusCode());
         assertEquals(201, move("RETURN", tech, routerItem).statusCode());
-        assertEquals(400, request("DELETE", "/routers/" + router, null).statusCode());
+        assertEquals(409, request("DELETE", "/routers/" + router, null).statusCode());
         assertEquals(200, request("POST", "/routers/" + router + "/archive", "{}").statusCode());
         assertEquals(400, move("WITHDRAWAL", tech, routerItem).statusCode());
-        assertEquals(400, request("POST", "/routers/" + router + "/archive", "{}").statusCode());
+        assertEquals(409, request("POST", "/routers/" + router + "/archive", "{}").statusCode());
         assertFalse(request("GET", "/products", null).body().contains(product));
         assertFalse(request("GET", "/routers", null).body().contains(router));
         var history = request("GET", "/movements", null);
