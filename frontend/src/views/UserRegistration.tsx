@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from "react"
-import { api, ApiError } from "./api"
+import { api, ApiError } from "../api"
 
 type UserResponse = { id: string; name: string; email: string }
 
