@@ -12,7 +12,7 @@ WORKDIR /app
 COPY backend/ ./backend/
 COPY --from=frontend /app/frontend/dist ./frontend/dist
 WORKDIR /app/backend
-RUN mvn -B clean package -Pwith-frontend -Dtest=AuthenticationIntegrationTest
+RUN mvn -B clean package -Pwith-frontend
 
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app

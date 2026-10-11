@@ -289,7 +289,7 @@ pnpm build
 
 Os testes do backend usam H2 temporário em modo PostgreSQL e não alteram o banco operacional. Cobrem cadastro, movimentação, reversão de transações, normalização de identificadores, edição, validações, exclusão e arquivamento.
 
-Os testes do frontend verificam o histórico e a normalização dos identificadores. O Dockerfile executa a checagem TypeScript, os testes do frontend e AuthenticationIntegrationTest antes de gerar a aplicação integrada; não executa toda a suíte do backend.
+Os testes do frontend verificam o histórico e a normalização dos identificadores. O Dockerfile executa a checagem TypeScript, os testes do frontend e a suíte completa do backend antes de gerar a aplicação integrada; se algum teste falhar, o deploy é interrompido.
 
 ## Escopo atual
 

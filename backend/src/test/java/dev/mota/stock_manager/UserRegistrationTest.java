@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
     "spring.datasource.url=jdbc:h2:mem:users;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
     "spring.datasource.driver-class-name=org.h2.Driver",
     "spring.datasource.username=sa", "spring.datasource.password=",
-    "spring.jpa.show-sql=false"
+    "spring.jpa.show-sql=false", TestSession.ADMIN_EMAIL, TestSession.ADMIN_PASSWORD
 })
 class UserRegistrationTest {
     @Autowired UserController controller;
