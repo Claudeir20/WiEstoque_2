@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -41,8 +42,11 @@ public class ProductService {
     }
 
     public List<ProductResponse> findAll(boolean includeArchived) {
+        Set<UUID> withAdjustments = adjustmentRepository.findProductIdsWithAdjustments();
         return productRepository.findAll(Sort.by("name")).stream()
-            .filter(p -> includeArchived || p.isActive()).map(productMapper::toResponse).toList();
+                .filter(p -> includeArchived || p.isActive())
+                .map(p -> productMapper.toResponse(p, withAdjustments.contains(p.getId())))
+                .toList();
     }
 
     @Transactional

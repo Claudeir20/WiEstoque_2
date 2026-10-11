@@ -10,7 +10,11 @@ import dev.mota.stock_manager.repository.ProductAdjustmentRepository;
 public class ProductMapper {
     private final ProductAdjustmentRepository adjustments;
 
-    public  ProductResponse toResponse(Product product) {
+    public ProductResponse toResponse(Product product) {
+        return toResponse(product, adjustments.existsByProductId(product.getId()));
+    }
+
+    public ProductResponse toResponse(Product product, boolean hasAdjustments) {
         return new ProductResponse(
                 product.getId(),
                 product.getVersion(),
@@ -18,7 +22,7 @@ public class ProductMapper {
                 product.getQuantity(),
                 product.getMinimumQuantity(),
                 product.isActive(),
-                adjustments.existsByProductId(product.getId()),
+                hasAdjustments,
                 product.getCreatedAt()
         );
     }

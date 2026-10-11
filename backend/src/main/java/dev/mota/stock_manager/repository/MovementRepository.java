@@ -2,6 +2,8 @@ package dev.mota.stock_manager.repository;
 
 
 import dev.mota.stock_manager.entity.Movement;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +17,8 @@ public interface MovementRepository
     boolean existsByTechnicianId(UUID technicianId);
 
     List<Movement> findByTechnicianId(UUID technicianId);
+
+    @Override
+    @EntityGraph(attributePaths = {"items", "items.product", "items.router"})
+    List<Movement> findAll(Sort sort);
 }
