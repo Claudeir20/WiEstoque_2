@@ -7,6 +7,10 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import java.util.Map;
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    @ExceptionHandler(dev.mota.stock_manager.exception.EmailAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> emailConflict(dev.mota.stock_manager.exception.EmailAlreadyExistsException ex) {
+        return ResponseEntity.status(409).body(Map.of("message", ex.getMessage()));
+    }
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> invalid(IllegalArgumentException ex) {
         return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));

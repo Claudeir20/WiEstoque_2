@@ -39,22 +39,107 @@ export type Movement = {
   }[]
 }
 const base = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "")
-export async function api<T>(endpoint: string, body?: unknown, method?: "GET" | "POST" | "DELETE" | "PUT"): Promise<T> {
-  let response: Response
-  try {
-    response = await fetch(base + endpoint, {
-      method: method ?? (body === undefined ? "GET" : "POST"),
-      headers: { "Content-Type": "application/json" },
-      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-    })
-  } catch {
-    throw new Error(
-      "Não foi possível conectar ao servidor. Verifique se o backend está em execução.",
+
+
+type CsrfResponse= {
+  headerName: string
+  token: string
+}
+
+export class ApiError extends Error {
+  constructor(message: string, public  status: number) {
+    super(message);
+  }
+}
+
+async function getCsrf(): Promise<CsrfResponse> {
+  const response = await fetch(`${base}/auth/csrf`, {
+    credentials: "include",
+  })
+
+  if (!response.ok) {
+    throw new ApiError("Não foi possível obter o token.", response.status)
+  }
+
+  return response.json()
+}
+
+
+
+export async function api<T>(
+    endpoint: string,
+    body?: unknown,
+    method?: "GET" | "POST" | "PUT" | "DELETE",
+): Promise<T> {
+  const verb = method ?? (body === undefined ? "GET" : "POST")
+  const headers: Record<string, string> = {}
+
+  if (body !== undefined) {
+    headers["Content-Type"] = "application/json"
+  }
+
+  if (verb !== "GET") {
+    const csrf = await getCsrf()
+    headers[csrf.headerName] = csrf.token
+  }
+
+  const response = await fetch(base + endpoint, {
+    method: verb,
+    credentials: "include",
+    headers,
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  })
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      window.dispatchEvent(new Event("session-expired"))
+    }
+
+    const error = await response.json().catch(() => ({}))
+
+    throw new ApiError(
+        error.message || "Não foi possível concluir a operação.",
+        response.status,
     )
   }
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.message || "Não foi possível concluir a operação.")
-  }
+
+  if (response.status === 204) return undefined as T
+
   return response.json()
+}
+
+export async function login(email: string, password: string) {
+  const csrf = await getCsrf()
+
+  const response = await fetch(`${base}/auth/login`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      [csrf.headerName]: csrf.token,
+    },
+    body: new URLSearchParams({
+      email: email.trim(),
+      password,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new ApiError(
+        response.status === 401
+            ? "E-mail ou senha incorretos."
+            : "Não foi possível entrar.",
+        response.status,
+    )
+  }
+
+  await getCsrf()
+}
+export async function logout(): Promise<void> {
+  try {
+    await api<void>("/auth/logout", undefined, "POST")
+  } catch (error) {
+    if (!(error instanceof ApiError && error.status === 401)) throw error
+  }
+  window.dispatchEvent(new Event("session-expired"))
 }

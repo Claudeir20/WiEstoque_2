@@ -1,3 +1,4 @@
+import UserRegistration from "./UserRegistration"
 import { usePagination } from "./Pagination"
 import { pendingReturns } from "./pendingReturns"
 import { searchMovementItems, candidateUnavailable, type SearchCandidate } from "./movementSearch"
@@ -20,7 +21,7 @@ import {
   useState,
 } from "react"
 
-type View = "painel" | "movimentacao" | "estoque" | "historico" | "tecnicos" | "roteadores"
+type View = "painel" | "movimentacao" | "estoque" | "historico" | "tecnicos" | "roteadores" | "usuarios"
 type MovementType = "Saída" | "Devolução" | "Entrada"
 
 type MovementItem = {
@@ -144,6 +145,7 @@ const navItems: {
   { id: "historico", label: "Histórico", icon: "clock" },
   { id: "tecnicos", label: "Técnicos", icon: "users" },
   { id: "roteadores", label: "Roteadores", icon: "router" },
+  { id: "usuarios", label: "Usuários", icon: "users" },
 ]
 
 function Badge({
@@ -170,7 +172,17 @@ function EmptyState({ query }: { query: string }) {
   )
 }
 
-export default function App() {
+export default function App({ email, onLogout }: { email: string; onLogout: () => Promise<void> }) {
+  const [loggingOut, setLoggingOut] = useState(false)
+  const logoutPending = useRef(false)
+  const [logoutError, setLogoutError] = useState("")
+  async function handleLogout() {
+    if (logoutPending.current || savingRef.current) return
+    logoutPending.current = true; setLoggingOut(true); setLogoutError("")
+    try { await onLogout() }
+    catch (e) { setLogoutError(e instanceof Error ? e.message : "Não foi possível sair. Tente novamente.") }
+    finally { logoutPending.current = false; setLoggingOut(false) }
+  }
   const [view, setView] = useState<View>("painel")
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [movementType, setMovementType] = useState<MovementType>("Saída")
@@ -274,6 +286,7 @@ export default function App() {
   )
 
   function navigate(next: View) {
+    if (savingRef.current) return
     setView(next)
     setMobileNavOpen(false)
   }
@@ -291,6 +304,7 @@ export default function App() {
     }
     selectItem(matches[0].id)
   }
+  
   function selectItem(id: string) {
     if (savingRef.current) return
     const candidate = candidates.find(item => item.id === id) ?? searchMovementItems(products, routerData, routerData.find(r => r.id === id)?.assetNumber ?? "", movementType).find(item => item.id === id)
@@ -310,6 +324,8 @@ export default function App() {
         return
       }
     }
+
+
     const existing = items.find((i) => i.id === candidate.id)
     if (
       movementType === "Saída" &&
@@ -458,11 +474,13 @@ export default function App() {
           <span className="avatar">AR</span>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-ink">
-              Operador de estoque
+              {email}
             </p>
             <p className="truncate text-xs text-muted">Gestão de estoque</p>
           </div>
         </div>
+        <button className="secondary-button" disabled={loggingOut || saving} onClick={() => void handleLogout()}>{loggingOut ? "Saindo…" : "Sair"}</button>
+        {logoutError && <p role="alert">{logoutError}</p>}
       </aside>
 
       {mobileNavOpen && (
@@ -527,6 +545,7 @@ export default function App() {
             saved={refresh}
           />
         )}
+        {view === "usuarios" && <UserRegistration onBusy={busy => { savingRef.current = busy; setSaving(busy) }} />}
         {!loading && view === "painel" && <Dashboard products={products.filter(p => p.active)} routers={routerData} movements={movements} navigate={navigate} />}
         {!loading && view === "movimentacao" && (
           <MovementView
