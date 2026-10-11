@@ -1,9 +1,9 @@
 package dev.mota.stock_manager;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.beans.factory.annotation.Value;
-import java.net.URI;
 import java.net.http.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,15 +11,14 @@ import static org.junit.jupiter.api.Assertions.*;
     "spring.datasource.url=jdbc:h2:mem:integration;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
     "spring.datasource.driver-class-name=org.h2.Driver",
     "spring.datasource.username=sa", "spring.datasource.password=",
-    "spring.jpa.show-sql=false"
+    "spring.jpa.show-sql=false", TestSession.ADMIN_EMAIL, TestSession.ADMIN_PASSWORD
 })
 class ApiIntegrationTest {
     @Value("${local.server.port}") int port;
-    private final HttpClient client = HttpClient.newHttpClient();
+    private TestSession session;
+    @BeforeEach void login() throws Exception { session = new TestSession(port); }
     private HttpResponse<String> request(String path, String body) throws Exception {
-        var builder = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path));
-        if (body != null) builder.header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(body));
-        return client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+        return session.request(body == null ? "GET" : "POST", path, body);
     }
     private String id(HttpResponse<String> response) {
         assertEquals(201, response.statusCode(), response.body());
