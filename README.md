@@ -118,7 +118,7 @@ O filtro padrão é **Saída**. Para comparar retiradas e devoluções, selecion
 | API | Java 21, Spring Boot, Spring Web MVC e Spring Data JPA. |
 | Persistência | PostgreSQL, Hibernate e migrações Flyway. |
 | Testes | JUnit, testes HTTP de integração, H2 temporário e testes do frontend com Node.js. |
-| Instalação opcional | Docker Compose, Nginx e containers para frontend, backend e banco. |
+| Publicação | Docker no Render, com PostgreSQL no Neon. |
 
 ```text
 Sistema de estoque/
@@ -129,10 +129,9 @@ Sistema de estoque/
 │   ├── src/                         Telas, integração com a API e estilos
 │   ├── public/                      Logo do WiEstoque
 │   └── tests/                       Testes do frontend
-├── implantacao/                     Documentação e scripts para Docker
 ├── importacao-planilha-2026-10-07/   Relatório e registros da importação inicial
-├── compose.yaml                     Configuração dos serviços Docker
-├── ATUALIZAR-EDICAO-MATERIAIS.md     Orientação de atualização sem Docker
+├── Dockerfile                       Build integrado utilizado pelo Render
+├── EMPACOTAR.md                     Como gerar e testar o JAR integrado
 └── README.md                        Documentação geral do projeto
 ```
 
@@ -197,27 +196,20 @@ $env:API_TARGET = 'http://localhost:8081'
 pnpm dev
 ```
 
-Na instalação sem Docker utilizada na empresa, os scripts **Iniciar-backend.cmd** e **Iniciar-frontend.cmd** pertencem ao pacote separado `estoque-sem-docker`. Ele utiliza Maven e npm disponíveis no computador e pode usar um arquivo `configuracao-local.ps1`. Preserve a configuração que já funciona nessa instalação. Esses scripts não são os mesmos `Iniciar.cmd` do pacote Docker.
 
 No fluxo de desenvolvimento sem Docker, mantenha as janelas dos dois serviços abertas. Para parar, use `Ctrl+C` em cada uma. Os registros permanecem no PostgreSQL.
 
-## Instalar com Docker
+## Publicação na nuvem
 
-O Docker é uma alternativa de instalação. Ele reúne frontend, backend e PostgreSQL e dispensa instalar Java, Node.js e PostgreSQL separadamente no Windows.
+O sistema da empresa está em https://wiestoque-2.onrender.com, com os dados no PostgreSQL do Neon. Os computadores precisam de navegador e internet; o computador do desenvolvedor pode permanecer desligado.
 
-1. Confira a compatibilidade e instale o Docker Desktop com containers Linux.
-2. Extraia o pacote de instalação em uma pasta permanente do computador.
-3. Abra o Docker Desktop e aguarde a inicialização.
-4. Execute **Instalar.cmd** e aguarde a conclusão.
-5. Abra o atalho **Sistema de Estoque** criado na Área de Trabalho ou **http://localhost:8085**.
+O Render utiliza o Dockerfile da raiz para compilar frontend e backend em uma aplicação integrada. Mantenha a Root Directory vazia e o Dockerfile Path como ./Dockerfile. Configure SPRING_PROFILES_ACTIVE=prod, PORT, DATABASE_URL (JDBC com SSL), DATABASE_USER e DATABASE_PASSWORD no serviço, sem versionar senhas.
 
-A primeira instalação precisa de internet. Para iniciar os serviços posteriormente, use **Iniciar.cmd**.
+Em banco sem usuários, configure também INITIAL_ADMIN_EMAIL e INITIAL_ADMIN_PASSWORD para criar o primeiro administrador. Consulte LOGIN.md para o fluxo de autenticação.
 
-Consulte o [guia de implantação](implantacao/LEIA-ME.md), os [requisitos oficiais do Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) e as [condições de licença](https://docs.docker.com/subscription-billing/desktop-license/).
+Para atualizar, teste a alteração, faça commit e push para a branch configurada no serviço (atualmente feature/login). Com Auto-Deploy habilitado, o Render inicia o deploy após o push; caso contrário, use Manual Deploy. O commit local sozinho não publica uma atualização. Mudanças de tabelas devem usar novas migrations do Flyway, preservando as já aplicadas.
 
-O pacote Docker utiliza um volume persistente para o banco e publica a interface somente no próprio computador. Quando presente, o SQL inicial é carregado apenas na criação de um volume novo. Sua data e suas contagens ficam no manifesto de dados iniciais. O pacote é uma cópia de um momento específico e não sincroniza bancos de computadores diferentes.
-
-**Pacotes ZIP já gerados não recebem alterações do código automaticamente.** O antigo `pacote-empresa.zip` pode representar uma versão anterior. Para a instalação sem Docker da empresa, utilize o pacote de atualização correspondente e suas instruções.
+Para gerar e testar o JAR no computador, consulte EMPACOTAR.md.
 
 ## Como usar no dia a dia
 
@@ -232,30 +224,11 @@ O pacote Docker utiliza um volume persistente para o banco e publica a interface
 
 ## Backup e atualização
 
-### Instalação sem Docker
+Faça backups periódicos do banco Neon e mantenha uma cópia em local separado. Exportações de CSV/Excel das telas não substituem um backup completo do banco. Os dados locais e os dados do Neon são bancos separados, sem sincronização automática.
 
-Use o procedimento de backup do PostgreSQL configurado na empresa. O backup completo precisa incluir todas as tabelas, inclusive `product_adjustments` e o histórico de migrações do Flyway.
+Antes de migrations ou importações, faça um backup do banco de destino. Para atualizar o código, utilize o fluxo de publicação na nuvem acima. Uma restauração deve ser planejada para o banco correto; não restaure um backup completo sobre o banco em uso sem conferir os dados e o histórico do Flyway.
 
-Para atualizar:
-
-1. Faça um backup completo e guarde uma cópia fora do computador.
-2. Pare o backend e o frontend.
-3. Aplique os arquivos da atualização sobre a instalação existente, seguindo o guia do pacote.
-4. Preserve as configurações locais, credenciais e o banco utilizado pela empresa.
-5. Inicie novamente os serviços. O backend aplica as migrações pendentes.
-6. Atualize o navegador e confira as funcionalidades.
-
-O [guia de atualização de materiais e técnicos](ATUALIZAR-EDICAO-MATERIAIS.md) descreve o procedimento para o pacote sem Docker usado na empresa.
-
-### Instalação Docker
-
-- **Backup.cmd** gera um backup do banco.
-- **Ativar backup diario.cmd** configura a execução diária às 17h.
-- O agendamento depende do usuário conectado, do computador ligado e do Docker funcionando.
-- Preserve `.env`, backups e o volume do banco durante as atualizações.
-- Não remova o volume do banco nem execute `docker compose down -v` para atualizar.
-
-Detalhes de inicialização, atualização e recuperação estão no [guia de implantação](implantacao/LEIA-ME.md). A restauração é feita pelo PostgreSQL e deve ser planejada para o banco correto; não existe uma tela de restauração no sistema.
+As cópias de dados da implantação local anterior em implantacao/dados-iniciais.sql e implantacao/dados-iniciais-manifesto.json foram preservadas como histórico. Não são backups atuais do Neon e não devem ser importadas novamente no sistema publicado.
 
 ## Importação inicial das planilhas
 
@@ -316,15 +289,15 @@ pnpm build
 
 Os testes do backend usam H2 temporário em modo PostgreSQL e não alteram o banco operacional. Cobrem cadastro, movimentação, reversão de transações, normalização de identificadores, edição, validações, exclusão e arquivamento.
 
-Os testes do frontend cobrem filtros e resumos do histórico, formatação dos identificadores, busca e disponibilidade dos candidatos e a exportação CSV/Excel com acentos e números preservados. O build verifica a geração dos arquivos de distribuição. Na verificação realizada, os tipos do código `src` passaram; a checagem completa `pnpm exec tsc --noEmit` encontrou erros preexistentes nos tipos dos plugins de `vite.config.ts`, embora o build tenha concluído.
+Os testes do frontend verificam o histórico e a normalização dos identificadores. O Dockerfile executa a checagem TypeScript, os testes do frontend e AuthenticationIntegrationTest antes de gerar a aplicação integrada; não executa toda a suíte do backend.
 
 ## Escopo atual
 
-- O sistema não possui login, perfis de acesso ou identificação do usuário que fez um ajuste.
+- O sistema possui login por sessão e cadastro de usuários restrito a administradores. Os ajustes ainda não identificam o usuário responsável.
 - Não existe sincronização automática entre computadores.
 - A instalação sem Docker descrita utiliza o servidor de desenvolvimento do Vite e a execução do backend pelo Maven ou IntelliJ.
 - Não há tela de edição de roteadores, reativação de roteadores arquivados, restauração de backup ou importação contínua de planilhas.
-- Publicar o sistema na internet exige preparar autenticação, controle de acesso, HTTPS e a configuração do encaminhamento da API.
+- O sistema publicado utiliza HTTPS, autenticação por sessão e proteção CSRF.
 
 O WiEstoque foi pensado inicialmente para a operação local do estoque da WiNET. Sua proposta é manter o saldo consultável, os equipamentos identificados e as movimentações rastreáveis, com correções registradas e preservação do histórico.
 
