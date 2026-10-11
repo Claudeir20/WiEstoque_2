@@ -1,0 +1,6 @@
+const test = require('node:test'); const assert = require('node:assert/strict'); const fs = require('node:fs'); const path = require('node:path'); const Module = require('node:module'); const ts = require('typescript');
+const filename=path.join(__dirname,'../src/pendingReturns.ts'); const loaded=new Module(filename,module); loaded._compile(ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,filename); const {pendingReturns}=loaded.exports;
+const routers=[{id:'r',status:'OUT_OF_STOCK'},{id:'stock',status:'IN_STOCK'}];
+const movement=(date,type,technicianId)=>({date,type,technicianId,items:[{routerId:'r'}]});
+test('Pending routers use latest withdrawal and exclude returned stock',()=>{ const result=pendingReturns(routers,[movement('2026-01-01','WITHDRAWAL','a'),movement('2026-01-02','RETURN','a'),movement('2026-01-03','WITHDRAWAL','b')]); assert.equal(result.length,1); assert.equal(result[0].technicianId,'b'); });
+test('Missing, contradictory and tied history do not invent a technician',()=>{ for(const history of [[],[movement('2026-01-01','RETURN','a')],[movement('2026-01-01','WITHDRAWAL','a'),movement('2026-01-01','WITHDRAWAL','b')]]) assert.equal(pendingReturns(routers,history)[0].technicianId,null); });

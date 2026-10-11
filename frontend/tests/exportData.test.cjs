@@ -1,0 +1,42 @@
+const test = require('node:test')
+const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const path = require('node:path')
+const Module = require('node:module')
+const ts = require('typescript')
+function load(name) {
+ const filename = path.join(__dirname, '../src/' + name + '.ts')
+ const compiled = ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true } }).outputText
+ const loaded = new Module(filename, module)
+ loaded.paths = Module._nodeModulePaths(path.dirname(filename))
+ loaded._compile(compiled, filename)
+ return loaded.exports
+}
+const { makeCsv, makeExcel } = load('exportData')
+const ExcelJS = require('exceljs')
+test('CSV preserves accents, quotes, separators and numeric signs', () => {
+ const csv=makeCsv([{'Técnico':'JOÃO','Item':'Cabo; "óptico"','Quantidade':-2}])
+ assert.ok(csv.startsWith('\uFEFF"Técnico";"Item";"Quantidade"\r\n'))
+ assert.ok(csv.includes('"Cabo; ""óptico"""'))
+ assert.ok(csv.endsWith('"-2"'))
+ assert.equal(makeCsv([]),'')
+ assert.ok(makeCsv([{'Item':' =1+1'}]).includes("' =1+1"))
+})
+test('Excel roundtrip keeps Portuguese headers, numbers, text and formatting', async () => {
+ const rows=[{'Data':'08/10/2026','Técnico':'JOÃO','Item':'=1+1','Quantidade':12}, {'Data':'08/10/2026','Técnico':'MARCO','Item':'Cabo óptico','Quantidade':-2}]
+ const data=await makeExcel(rows)
+ const workbook=new ExcelJS.Workbook()
+ await workbook.xlsx.load(data)
+ const sheet=workbook.getWorksheet('Relatório')
+ assert.equal(sheet.rowCount,3)
+ assert.equal(sheet.getCell('B1').value,'Técnico')
+ assert.equal(sheet.getCell('B2').value,'JOÃO')
+ assert.equal(sheet.getCell('C2').value,'=1+1')
+ assert.equal(sheet.getCell('C2').type,ExcelJS.ValueType.String)
+ assert.equal(sheet.getCell('D2').value,12)
+ assert.equal(sheet.getCell('D3').value,-2)
+ assert.equal(sheet.views[0].ySplit,1)
+ assert.ok(sheet.autoFilter)
+ assert.equal(sheet.getRow(1).font.bold,true)
+ await assert.rejects(makeExcel([]),/Não há dados/)
+})
