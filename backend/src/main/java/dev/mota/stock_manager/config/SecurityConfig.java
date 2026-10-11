@@ -21,6 +21,7 @@ public class SecurityConfig {
             throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/", "/index.html", "/assets/**", "/wiestoque.svg", "/robots.txt", "/favicon.ico").permitAll()
                         .requestMatchers("/auth/csrf").permitAll()
 
                         // Ele exige que o usuário tenha a autoridade ROLE_ADMIN para acessar essas rotas.

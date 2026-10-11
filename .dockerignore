@@ -1,0 +1,11 @@
+.git
+**/.idea
+**/node_modules
+**/target
+**/dist
+**/.env
+**/.env.*
+**/*.log
+**/*.zip
+**/backups
+implantacao

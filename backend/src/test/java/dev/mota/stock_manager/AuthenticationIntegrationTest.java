@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
     "spring.datasource.url=jdbc:h2:mem:authentication;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
     "spring.datasource.driver-class-name=org.h2.Driver",
+    "INITIAL_ADMIN_EMAIL=bootstrap@example.com", "INITIAL_ADMIN_PASSWORD=bootstrap123",
     "spring.datasource.username=sa", "spring.datasource.password=", "spring.jpa.show-sql=false"
 })
 class AuthenticationIntegrationTest {
@@ -50,6 +51,20 @@ class AuthenticationIntegrationTest {
         return send("/auth/login", "POST", "email=" + URLEncoder.encode(email, java.nio.charset.StandardCharsets.UTF_8)
             + "&password=" + URLEncoder.encode(password, java.nio.charset.StandardCharsets.UTF_8), token,
             "application/x-www-form-urlencoded").statusCode();
+    }
+
+    @Test
+    void servesFrontendWithoutOpeningProtectedApi() throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue(getClass().getResource("/static/index.html") != null);
+        var home = send("/", "GET", null, null, null);
+        assertEquals(200, home.statusCode());
+        assertTrue(home.body().contains("id=" + (char) 34 + "root" + (char) 34));
+        var asset = java.util.regex.Pattern.compile("/assets/[^" + (char) 34 + " ]+\\.js").matcher(home.body());
+        assertTrue(asset.find());
+        assertEquals(200, send(asset.group(), "GET", null, null, null).statusCode());
+        assertEquals(200, send("/wiestoque.svg", "GET", null, null, null).statusCode());
+        assertEquals(401, send("/products", "GET", null, null, null).statusCode());
+        assertEquals(401, send("/users", "POST", "{}", csrf(), "application/json").statusCode());
     }
 
     @Test
