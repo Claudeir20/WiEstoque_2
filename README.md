@@ -203,11 +203,11 @@ No fluxo de desenvolvimento sem Docker, mantenha as janelas dos dois serviços a
 
 O sistema da empresa está em https://wiestoque-2.onrender.com, com os dados no PostgreSQL do Neon. Os computadores precisam de navegador e internet; o computador do desenvolvedor pode permanecer desligado.
 
-O Render utiliza o Dockerfile da raiz para compilar frontend e backend em uma aplicação integrada. Mantenha a Root Directory vazia e o Dockerfile Path como ./Dockerfile. Configure SPRING_PROFILES_ACTIVE=prod, PORT, DATABASE_URL (JDBC com SSL), DATABASE_USER e DATABASE_PASSWORD no serviço, sem versionar senhas.
+O Render utiliza o Dockerfile da raiz para compilar frontend e backend em uma aplicação integrada. Mantenha a Root Directory vazia e o Dockerfile Path como ./Dockerfile. Configure SPRING_PROFILES_ACTIVE=prod, PORT, DATABASE_URL (JDBC com SSL), DATABASE_USER, DATABASE_PASSWORD e TZ=America/Sao_Paulo no serviço, sem versionar senhas. O TZ faz as movimentações serem gravadas no horário de Brasília; sem ele, o servidor usa UTC e lançamentos após as 21h aparecem com a data do dia seguinte.
 
-Em banco sem usuários, configure também INITIAL_ADMIN_EMAIL e INITIAL_ADMIN_PASSWORD para criar o primeiro administrador. Consulte LOGIN.md para o fluxo de autenticação.
+Em banco sem usuários, configure também INITIAL_ADMIN_EMAIL e INITIAL_ADMIN_PASSWORD para criar o primeiro administrador. Depois do primeiro acesso, essas variáveis podem ser removidas. Consulte LOGIN.md para o fluxo de autenticação.
 
-Para atualizar, teste a alteração, faça commit e push para a branch configurada no serviço (atualmente feature/login). Com Auto-Deploy habilitado, o Render inicia o deploy após o push; caso contrário, use Manual Deploy. O commit local sozinho não publica uma atualização. Mudanças de tabelas devem usar novas migrations do Flyway, preservando as já aplicadas.
+Para atualizar, crie uma branch para a alteração, teste, abra um pull request para a `master` e faça o merge. O Render publica a branch `master`: com Auto-Deploy habilitado, o deploy começa após o merge; caso contrário, use Manual Deploy. Se algum teste falhar durante o build, o deploy é interrompido e a versão anterior continua no ar. O commit local sozinho não publica uma atualização. Mudanças de tabelas devem usar novas migrations do Flyway, preservando as já aplicadas.
 
 Para gerar e testar o JAR no computador, consulte EMPACOTAR.md.
 
@@ -258,7 +258,15 @@ As rotas abaixo são do backend. No frontend, o proxy acrescenta o prefixo `/api
 | POST | `/technicians/{id}/archive` | Tornar o técnico inativo preservando o histórico. |
 | GET / POST | `/movements` | Consultar / registrar movimentações. |
 
-As edições enviam os valores anteriores para detectar formulários desatualizados: `expectedName` e `expectedQuantity` para materiais; `expectedName` e `expectedSector` para técnicos. Conflitos são retornados com HTTP 409. Dados inválidos retornam HTTP 400.
+As edições detectam formulários desatualizados: materiais enviam a `version` recebida na listagem; técnicos enviam `expectedName` e `expectedSector`.
+
+Os erros retornam `{"message": "..."}` em português, com o código:
+
+| Código | Quando |
+| --- | --- |
+| 400 | Dados inválidos ou regra de estoque (saldo insuficiente, roteador indisponível, item arquivado na movimentação). |
+| 404 | O registro indicado na URL não existe. |
+| 409 | Conflito com o estado atual: duplicado, formulário desatualizado, possui histórico, já arquivado ou já ativo. |
 
 ## Migrações e testes
 
@@ -271,6 +279,9 @@ O Flyway mantém a evolução do banco:
 | V3 | Estado ativo dos roteadores para arquivamento. |
 | V4 | Histórico de ajustes de materiais. |
 | V5 | Controle de versão dos técnicos. |
+| V6 | Nome de material único sem distinguir maiúsculas e minúsculas. |
+| V7 | Tabela de usuários. |
+| V8 | Permissão de administrador. |
 
 Para executar os testes do backend:
 
