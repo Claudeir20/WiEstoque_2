@@ -19,4 +19,4 @@ Abra http://localhost:8081. A porta 8081 permite manter o backend do IntelliJ na
 
 A tela de login, JavaScript, CSS e logo são públicos. As APIs permanecem protegidas, com CSRF e cadastro restrito a ADMIN. O frontend em desenvolvimento continua usando o proxy /api do Vite; o frontend empacotado chama /auth, /users e as demais APIs diretamente no mesmo domínio.
 
-Após alterar o frontend, gere novamente o JAR pelo script. A publicação AWS e a configuração HTTPS são etapas seguintes.
+Após alterar o frontend, gere novamente o JAR pelo script. O Render usa o Dockerfile da raiz para publicar a aplicação com HTTPS. Consulte README.md para configurar e atualizar o serviço.

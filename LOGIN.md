@@ -1,14 +1,18 @@
 # Login e permissões
 
-Reinicie o backend para o Flyway aplicar V8__user_administrator.sql. Reinicie o frontend para carregar as alterações.
-
-O login usa o e-mail e a senha cadastrados. A sessão é mantida pelo cookie JSESSIONID. O botão Sair encerra a sessão. As operações que alteram dados exigem o token CSRF.
+O login usa e-mail e senha. A sessão é mantida pelo cookie JSESSIONID, e o botão Sair encerra a sessão. Operações que alteram dados exigem o token CSRF. Na nuvem, os cookies usam HTTPS.
 
 ## Primeiro administrador
 
-Os usuários existentes e os novos cadastros começam com administrator = FALSE. Eles podem usar o estoque, mas apenas um administrador pode cadastrar usuários por POST /users.
+Em um banco sem usuários, InitialAdminConfig cria o administrador usando INITIAL_ADMIN_EMAIL e INITIAL_ADMIN_PASSWORD. Configure essas variáveis no ambiente antes da primeira inicialização. A senha deve ter pelo menos 8 caracteres e no máximo 72 bytes em UTF-8; ela é armazenada com BCrypt.
 
-Para promover uma conta já existente, execute no PostgreSQL conectado ao banco da aplicação, substituindo o endereço pelo e-mail exato dessa conta:
+Quando já existe qualquer usuário, a criação inicial não é executada. As variáveis iniciais podem ser removidas depois de confirmar o acesso. Elas não redefinem senhas de contas existentes.
+
+## Cadastro e permissões
+
+Administradores cadastram contas na tela Usuários. Novos usuários possuem acesso ao estoque, mas não recebem permissão de administrador automaticamente. SecurityConfig exige ROLE_ADMIN para /users e ROLE_USER para as demais APIs protegidas.
+
+Para promover uma conta existente, execute no banco correto, substituindo o e-mail:
 
 ```sql
 UPDATE users
@@ -16,10 +20,8 @@ SET administrator = TRUE
 WHERE email = 'email-da-conta@empresa.com';
 ```
 
-Confira se uma única conta foi atualizada. Saia e entre novamente para carregar a permissão ADMIN. Não há alteração automática de privilégios no banco de produção.
-
-Se o banco ainda não tiver nenhum usuário, será necessário criar a primeira conta com uma senha codificada pelo PasswordEncoder (BCrypt) antes dessa promoção. Não armazene senha em texto puro.
+Confira que uma única conta foi atualizada. Saia e entre novamente para carregar a permissão.
 
 ## Validação
 
-Os testes de autenticação usam banco H2 temporário e verificam login com usuário do banco, sessão, proteção CSRF, logout e restrição do cadastro a administradores. Não modificam o PostgreSQL configurado na empresa.
+AuthenticationIntegrationTest usa H2 temporário para verificar páginas públicas, autenticação, sessão, CSRF, logout e restrição do cadastro. Não modifica o PostgreSQL operacional.
