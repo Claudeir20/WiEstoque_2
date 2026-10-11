@@ -14,21 +14,27 @@ function AuthApp() {
   useEffect(() => {
     let active = true
 
-    const expired = () => { setAuthenticated(false); setEmail("") }
+    const expired = () => {
+      setAuthenticated(false)
+      setEmail("")
+    }
     window.addEventListener("session-expired", expired)
 
     api<{ email: string }>("/auth/me")
-        .then((session) => {
-          if (active) { setEmail(session.email); setAuthenticated(true) }
-        })
-        .catch((e) => {
-          if (active && !(e instanceof ApiError && e.status === 401)) {
-            setError("Não foi possível conectar ao servidor.")
-          }
-        })
-        .finally(() => {
-          if (active) setLoading(false)
-        })
+      .then((session) => {
+        if (active) {
+          setEmail(session.email)
+          setAuthenticated(true)
+        }
+      })
+      .catch((e) => {
+        if (active && !(e instanceof ApiError && e.status === 401)) {
+          setError("Não foi possível conectar ao servidor.")
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
 
     return () => {
       active = false
@@ -40,25 +46,25 @@ function AuthApp() {
 
   if (error) {
     return (
-        <div role="alert">
-          <p>{error}</p>
-          <button onClick={() => window.location.reload()}>
-            Tentar novamente
-          </button>
-        </div>
+      <div role="alert">
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()}>
+          Tentar novamente
+        </button>
+      </div>
     )
   }
 
   if (!authenticated) {
     return (
-        <Login
-            onLogin={async ({ username, password }) => {
-              await login(username, password)
-              const session = await api<{ email: string }>("/auth/me")
-              setEmail(session.email)
-            }}
-            onSuccess={() => setAuthenticated(true)}
-        />
+      <Login
+        onLogin={async ({ username, password }) => {
+          await login(username, password)
+          const session = await api<{ email: string }>("/auth/me")
+          setEmail(session.email)
+        }}
+        onSuccess={() => setAuthenticated(true)}
+      />
     )
   }
 
@@ -66,7 +72,7 @@ function AuthApp() {
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-    <React.StrictMode>
-      <AuthApp />
-    </React.StrictMode>,
+  <React.StrictMode>
+    <AuthApp />
+  </React.StrictMode>,
 )

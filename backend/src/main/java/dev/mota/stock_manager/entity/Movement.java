@@ -59,13 +59,13 @@ public class Movement {
     ) {
         if (technicianId == null && type != MovementType.ENTRY) {
             throw new IllegalArgumentException(
-                    "Technician is required"
+                    "Selecione um técnico."
             );
         }
 
         if (type == null) {
             throw new IllegalArgumentException(
-                    "Movement type is required"
+                    "Informe o tipo da movimentação."
             );
         }
 
@@ -82,13 +82,13 @@ public class Movement {
     ) {
         if (product == null) {
             throw new IllegalArgumentException(
-                    "Product is required"
+                    "Informe o material."
             );
         }
 
         if (quantity <= 0) {
             throw new IllegalArgumentException(
-                    "Quantity must be greater than zero"
+                    "A quantidade deve ser maior que zero."
             );
         }
 
@@ -104,7 +104,7 @@ public class Movement {
 
         if (router == null) {
             throw new IllegalArgumentException(
-                    "Router is required"
+                    "Informe o roteador."
             );
         }
 

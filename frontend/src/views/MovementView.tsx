@@ -39,21 +39,50 @@ export default function MovementView(props: MovementProps) {
   const [highlighted, setHighlighted] = useState(-1)
   const [resultsOpen, setResultsOpen] = useState(true)
   const shownCandidates = props.candidates.slice(0, 20)
-  const choose = (id: string) => { props.selectItem(id); setHighlighted(-1); searchInput.current?.focus() }
-  useEffect(() => { setHighlighted(-1); setResultsOpen(true) }, [props.query, props.movementType])
+  const choose = (id: string) => {
+    props.selectItem(id)
+    setHighlighted(-1)
+    searchInput.current?.focus()
+  }
+  useEffect(() => {
+    setHighlighted(-1)
+    setResultsOpen(true)
+  }, [props.query, props.movementType])
   function searchKey(event: import("react").KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Escape") { setResultsOpen(false); setHighlighted(-1); return }
+    if (event.key === "Escape") {
+      setResultsOpen(false)
+      setHighlighted(-1)
+      return
+    }
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-      event.preventDefault(); setResultsOpen(true)
+      event.preventDefault()
+      setResultsOpen(true)
       const direction = event.key === "ArrowDown" ? 1 : -1
       for (let step = 1; step <= shownCandidates.length; step++) {
         const base = highlighted === -1 && direction === -1 ? 0 : highlighted
-        const index = (base + direction * step + shownCandidates.length) % shownCandidates.length
-        if (!candidateUnavailable(shownCandidates[index], props.movementType, props.items)) { setHighlighted(index); break }
+        const index =
+          (base + direction * step + shownCandidates.length) %
+          shownCandidates.length
+        if (
+          !candidateUnavailable(
+            shownCandidates[index],
+            props.movementType,
+            props.items,
+          )
+        ) {
+          setHighlighted(index)
+          break
+        }
       }
     }
-    if (event.key === "Enter" && resultsOpen && highlighted >= 0 && shownCandidates[highlighted]) {
-      event.preventDefault(); choose(shownCandidates[highlighted].id)
+    if (
+      event.key === "Enter" &&
+      resultsOpen &&
+      highlighted >= 0 &&
+      shownCandidates[highlighted]
+    ) {
+      event.preventDefault()
+      choose(shownCandidates[highlighted].id)
     }
   }
   return (
@@ -186,8 +215,53 @@ export default function MovementView(props: MovementProps) {
             </div>
           </div>
 
-          {props.movementType === "Devolução" && <section className="pending-returns"><h3>Roteadores por técnico</h3><p>Lista baseada na última saída registrada. Selecione o técnico responsável para adicionar uma devolução.</p>{props.technician && props.pending.filter(p => p.technicianId === props.technician).map(({router}) => <button key={router.id} className="secondary-button" disabled={props.saving || props.items.some(i => i.id === router.id)} onClick={() => choose(router.id)}>{router.model} · {router.assetNumber} — Adicionar</button>)}{props.technician && !props.pending.some(p => p.technicianId === props.technician) && <p>Nenhum roteador pendente identificado para este técnico.</p>}{props.pending.some(p => !p.technicianId) && <p>{props.pending.filter(p => !p.technicianId).length} roteadores fora do estoque sem técnico identificado no histórico. Use a busca para localizar o equipamento.</p>}</section>}
-              <form className="search-form" onSubmit={event => { props.addItem(event); searchInput.current?.focus() }}>
+          {props.movementType === "Devolução" && (
+            <section className="pending-returns">
+              <h3>Roteadores por técnico</h3>
+              <p>
+                Lista baseada na última saída registrada. Selecione o técnico
+                responsável para adicionar uma devolução.
+              </p>
+              {props.technician &&
+                props.pending
+                  .filter((p) => p.technicianId === props.technician)
+                  .map(({ router }) => (
+                    <button
+                      key={router.id}
+                      className="secondary-button"
+                      disabled={
+                        props.saving ||
+                        props.items.some((i) => i.id === router.id)
+                      }
+                      onClick={() => choose(router.id)}
+                    >
+                      {router.model} · {router.assetNumber} — Adicionar
+                    </button>
+                  ))}
+              {props.technician &&
+                !props.pending.some(
+                  (p) => p.technicianId === props.technician,
+                ) && (
+                  <p>
+                    Nenhum roteador pendente identificado para este técnico.
+                  </p>
+                )}
+              {props.pending.some((p) => !p.technicianId) && (
+                <p>
+                  {props.pending.filter((p) => !p.technicianId).length}{" "}
+                  roteadores fora do estoque sem técnico identificado no
+                  histórico. Use a busca para localizar o equipamento.
+                </p>
+              )}
+            </section>
+          )}
+          <form
+            className="search-form"
+            onSubmit={(event) => {
+              props.addItem(event)
+              searchInput.current?.focus()
+            }}
+          >
             <label className="search-field">
               <span className="sr-only">
                 {props.movementType === "Entrada"
@@ -199,9 +273,17 @@ export default function MovementView(props: MovementProps) {
                 ref={searchInput}
                 role="combobox"
                 aria-autocomplete="list"
-                aria-expanded={resultsOpen && !!props.query.trim() && shownCandidates.length > 0}
+                aria-expanded={
+                  resultsOpen &&
+                  !!props.query.trim() &&
+                  shownCandidates.length > 0
+                }
                 aria-controls="movement-search-results"
-                aria-activedescendant={highlighted >= 0 && resultsOpen ? "search-option-" + highlighted : undefined}
+                aria-activedescendant={
+                  highlighted >= 0 && resultsOpen
+                    ? "search-option-" + highlighted
+                    : undefined
+                }
                 onKeyDown={searchKey}
                 onFocus={() => setResultsOpen(true)}
                 autoComplete="off"
@@ -224,23 +306,75 @@ export default function MovementView(props: MovementProps) {
             </button>
           </form>
 
-          <p className="search-help">Digite ou leia o código e pressione Enter. Use ↑ ↓ para escolher um resultado.</p>
-          {resultsOpen && props.query.trim() && <div className="search-results" id="movement-search-results" role="listbox" aria-label="Resultados da busca">
-            <p className="search-results-count" role="status">{props.candidates.length ? `${props.candidates.length} resultado(s)` : "Nenhum resultado. Confira o nome ou código."}</p>
-            {shownCandidates.map((candidate, index) => {
-              const blocked = candidateUnavailable(candidate, props.movementType, props.items)
-              return <button type="button" role="option" id={"search-option-" + index} aria-selected={highlighted === index}
-                className={"search-result " + (highlighted === index ? "search-result-selected" : "")}
-                key={candidate.id} disabled={props.saving || !!blocked} onClick={() => choose(candidate.id)}>
-                <span><strong>{candidate.name}</strong><small>{candidate.type === "PRODUCT" ? "Material" : "Roteador · " + candidate.detail}</small></span>
-                <span className="search-result-balance">{blocked || (candidate.type === "PRODUCT" ? `${candidate.available} em estoque` : candidate.available ? "No estoque" : "Fora do estoque")}</span>
-              </button>
-            })}
-            {props.candidates.length > 20 && <p className="search-help">Exibindo os primeiros 20. Digite mais para refinar a busca.</p>}
-          </div>}
+          <p className="search-help">
+            Digite ou leia o código e pressione Enter. Use ↑ ↓ para escolher um
+            resultado.
+          </p>
+          {resultsOpen && props.query.trim() && (
+            <div
+              className="search-results"
+              id="movement-search-results"
+              role="listbox"
+              aria-label="Resultados da busca"
+            >
+              <p className="search-results-count" role="status">
+                {props.candidates.length
+                  ? `${props.candidates.length} resultado(s)`
+                  : "Nenhum resultado. Confira o nome ou código."}
+              </p>
+              {shownCandidates.map((candidate, index) => {
+                const blocked = candidateUnavailable(
+                  candidate,
+                  props.movementType,
+                  props.items,
+                )
+                return (
+                  <button
+                    type="button"
+                    role="option"
+                    id={"search-option-" + index}
+                    aria-selected={highlighted === index}
+                    className={
+                      "search-result " +
+                      (highlighted === index ? "search-result-selected" : "")
+                    }
+                    key={candidate.id}
+                    disabled={props.saving || !!blocked}
+                    onClick={() => choose(candidate.id)}
+                  >
+                    <span>
+                      <strong>{candidate.name}</strong>
+                      <small>
+                        {candidate.type === "PRODUCT"
+                          ? "Material"
+                          : "Roteador · " + candidate.detail}
+                      </small>
+                    </span>
+                    <span className="search-result-balance">
+                      {blocked ||
+                        (candidate.type === "PRODUCT"
+                          ? `${candidate.available} em estoque`
+                          : candidate.available
+                            ? "No estoque"
+                            : "Fora do estoque")}
+                    </span>
+                  </button>
+                )
+              })}
+              {props.candidates.length > 20 && (
+                <p className="search-help">
+                  Exibindo os primeiros 20. Digite mais para refinar a busca.
+                </p>
+              )}
+            </div>
+          )}
           <div className="item-list">
             {props.items.length === 0 ? (
-              <div className="movement-empty"><Icon name="box" size={32} /><h3>Nenhum item adicionado</h3><p>Busque um material ou roteador acima para começar.</p></div>
+              <div className="movement-empty">
+                <Icon name="box" size={32} />
+                <h3>Nenhum item adicionado</h3>
+                <p>Busque um material ou roteador acima para começar.</p>
+              </div>
             ) : (
               props.items.map((item) => (
                 <div className="movement-item" key={item.id}>
@@ -296,7 +430,20 @@ export default function MovementView(props: MovementProps) {
                     >
                       <Icon name="minus" size={15} />
                     </button>
-                    {item.type === "ROUTER" ? <span>1</span> : <QuantityInput value={item.quantity} max={props.movementType === "Saída" ? item.available ?? 0 : 2147483647} disabled={props.saving} change={n => props.setQuantity(item.id, n)} />}
+                    {item.type === "ROUTER" ? (
+                      <span>1</span>
+                    ) : (
+                      <QuantityInput
+                        value={item.quantity}
+                        max={
+                          props.movementType === "Saída"
+                            ? (item.available ?? 0)
+                            : 2147483647
+                        }
+                        disabled={props.saving}
+                        change={(n) => props.setQuantity(item.id, n)}
+                      />
+                    )}
                     <button
                       disabled={
                         props.saving ||

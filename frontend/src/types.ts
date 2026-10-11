@@ -1,6 +1,11 @@
-
-
-export type View = "painel" | "movimentacao" | "estoque" | "historico" | "tecnicos" | "roteadores" | "usuarios"
+export type View =
+  | "painel"
+  | "movimentacao"
+  | "estoque"
+  | "historico"
+  | "tecnicos"
+  | "roteadores"
+  | "usuarios"
 export type MovementType = "Saída" | "Devolução" | "Entrada"
 
 export type MovementItem = {

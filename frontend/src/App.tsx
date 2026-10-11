@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react"
 import UserRegistration from "./views/UserRegistration"
-import { api, type Movement, type Product, type Router, type Technician } from "./api"
+import {
+  api,
+  type Movement,
+  type Product,
+  type Router,
+  type Technician,
+} from "./api"
 import Icon from "./components/Icon"
 import EditProductDialog from "./dialogs/EditProductDialog"
 import EditTechnicianDialog from "./dialogs/EditTechnicianDialog"
@@ -30,17 +36,33 @@ const navItems: {
   { id: "usuarios", label: "Usuários", icon: "users" },
 ]
 
-
-export default function App({ email, onLogout }: { email: string; onLogout: () => Promise<void> }) {
+export default function App({
+  email,
+  onLogout,
+}: {
+  email: string
+  onLogout: () => Promise<void>
+}) {
   const [loggingOut, setLoggingOut] = useState(false)
   const logoutPending = useRef(false)
   const [logoutError, setLogoutError] = useState("")
   async function handleLogout() {
     if (logoutPending.current || savingRef.current) return
-    logoutPending.current = true; setLoggingOut(true); setLogoutError("")
-    try { await onLogout() }
-    catch (e) { setLogoutError(e instanceof Error ? e.message : "Não foi possível sair. Tente novamente.") }
-    finally { logoutPending.current = false; setLoggingOut(false) }
+    logoutPending.current = true
+    setLoggingOut(true)
+    setLogoutError("")
+    try {
+      await onLogout()
+    } catch (e) {
+      setLogoutError(
+        e instanceof Error
+          ? e.message
+          : "Não foi possível sair. Tente novamente.",
+      )
+    } finally {
+      logoutPending.current = false
+      setLoggingOut(false)
+    }
   }
   const [view, setView] = useState<View>("painel")
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
@@ -53,9 +75,17 @@ export default function App({ email, onLogout }: { email: string; onLogout: () =
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
   const savingRef = useRef(false)
-  const movement = useMovementForm({ products, routerData, savingRef, setSaving, setError, refresh })
-  const [registration, setRegistration] =
-    useState<"products" | "technicians" | "routers" | null>(null)
+  const movement = useMovementForm({
+    products,
+    routerData,
+    savingRef,
+    setSaving,
+    setError,
+    refresh,
+  })
+  const [registration, setRegistration] = useState<
+    "products" | "technicians" | "routers" | null
+  >(null)
   async function refresh() {
     const [p, r, t, m] = await Promise.all([
       api<Product[]>("/products?includeArchived=true"),
@@ -82,22 +112,32 @@ export default function App({ email, onLogout }: { email: string; onLogout: () =
   useEffect(() => {
     void load()
   }, [])
-  const [editingTechnician, setEditingTechnician] = useState<Technician | null>(null)
+  const [editingTechnician, setEditingTechnician] = useState<Technician | null>(
+    null,
+  )
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [removal, setRemoval] = useState<RemovalTarget | null>(null)
   const [removalMessage, setRemovalMessage] = useState("")
   function hasHistory(kind: "products" | "routers", id: string) {
-    return (kind === "products" && !!products.find(p => p.id === id)?.hasAdjustments) || movements.some(m => m.items.some(i =>
-      kind === "products" ? i.productId === id : i.routerId === id,
-    ))
+    return (
+      (kind === "products" &&
+        !!products.find((p) => p.id === id)?.hasAdjustments) ||
+      movements.some((m) =>
+        m.items.some((i) =>
+          kind === "products" ? i.productId === id : i.routerId === id,
+        ),
+      )
+    )
   }
-  const inventory = products.filter(p => p.active).map((p) => ({
-    item: p.name,
-    category: "Produto",
-    code: p.id,
-    stock: p.quantity,
-    status: p.quantity <= p.minimumQuantity ? "Estoque baixo" : "Disponível",
-  }))
+  const inventory = products
+    .filter((p) => p.active)
+    .map((p) => ({
+      item: p.name,
+      category: "Produto",
+      code: p.id,
+      stock: p.quantity,
+      status: p.quantity <= p.minimumQuantity ? "Estoque baixo" : "Disponível",
+    }))
   const routers = routerData.map((r) => ({
     id: r.id,
     model: r.model,
@@ -141,10 +181,19 @@ export default function App({ email, onLogout }: { email: string; onLogout: () =
 
   async function reactivate(kind: "products" | "technicians", id: string) {
     if (savingRef.current) return
-    savingRef.current = true; setSaving(true); setError("")
-    try { await api(`/${kind}/${id}/reactivate`, {}, "POST"); await refresh(); setRemovalMessage("Cadastro reativado. Histórico preservado.") }
-    catch (e) { setError(e instanceof Error ? e.message : "Falha ao reativar.") }
-    finally { savingRef.current = false; setSaving(false) }
+    savingRef.current = true
+    setSaving(true)
+    setError("")
+    try {
+      await api(`/${kind}/${id}/reactivate`, {}, "POST")
+      await refresh()
+      setRemovalMessage("Cadastro reativado. Histórico preservado.")
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Falha ao reativar.")
+    } finally {
+      savingRef.current = false
+      setSaving(false)
+    }
   }
 
   return (
@@ -152,7 +201,13 @@ export default function App({ email, onLogout }: { email: string; onLogout: () =
       <aside className={`sidebar ${mobileNavOpen ? "sidebar-open" : ""}`}>
         <div className="brand">
           <span className="brand-mark">
-            <img src="/wiestoque.svg" width={40} height={40} alt="" aria-hidden="true" />
+            <img
+              src="/wiestoque.svg"
+              width={40}
+              height={40}
+              alt=""
+              aria-hidden="true"
+            />
           </span>
           <div>
             <span className="brand-name">WiEstoque</span>
@@ -199,13 +254,17 @@ export default function App({ email, onLogout }: { email: string; onLogout: () =
         <div className="sidebar-profile">
           <span className="avatar">AR</span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-ink">
-              {email}
-            </p>
+            <p className="truncate text-sm font-semibold text-ink">{email}</p>
             <p className="truncate text-xs text-muted">Gestão de estoque</p>
           </div>
         </div>
-        <button className="secondary-button" disabled={loggingOut || saving} onClick={() => void handleLogout()}>{loggingOut ? "Saindo…" : "Sair"}</button>
+        <button
+          className="secondary-button"
+          disabled={loggingOut || saving}
+          onClick={() => void handleLogout()}
+        >
+          {loggingOut ? "Saindo…" : "Sair"}
+        </button>
         {logoutError && <p role="alert">{logoutError}</p>}
       </aside>
 
@@ -227,7 +286,14 @@ export default function App({ email, onLogout }: { email: string; onLogout: () =
             <Icon name="menu" />
           </button>
           <span className="mobile-brand">
-            <img src="/wiestoque.svg" width={26} height={26} alt="" aria-hidden="true" /> WiEstoque
+            <img
+              src="/wiestoque.svg"
+              width={26}
+              height={26}
+              alt=""
+              aria-hidden="true"
+            />{" "}
+            WiEstoque
           </span>
           <span className="avatar avatar-small">AR</span>
         </header>
@@ -247,22 +313,51 @@ export default function App({ email, onLogout }: { email: string; onLogout: () =
             {error}
           </div>
         )}
-        {removalMessage && <div className="success-banner" role="status">{removalMessage}</div>}
-        {editingTechnician && <EditTechnicianDialog technician={editingTechnician} close={() => setEditingTechnician(null)} saved={async () => {
-          setRemovalMessage("Técnico atualizado.")
-          await refresh()
-        }} />}
-        {editingProduct && <EditProductDialog product={editingProduct} close={() => setEditingProduct(null)} saved={async () => {
-          setRemovalMessage("Material atualizado.")
-          await refresh()
-        }} />}
+        {removalMessage && (
+          <div className="success-banner" role="status">
+            {removalMessage}
+          </div>
+        )}
+        {editingTechnician && (
+          <EditTechnicianDialog
+            technician={editingTechnician}
+            close={() => setEditingTechnician(null)}
+            saved={async () => {
+              setRemovalMessage("Técnico atualizado.")
+              await refresh()
+            }}
+          />
+        )}
+        {editingProduct && (
+          <EditProductDialog
+            product={editingProduct}
+            close={() => setEditingProduct(null)}
+            saved={async () => {
+              setRemovalMessage("Material atualizado.")
+              await refresh()
+            }}
+          />
+        )}
         {removal && (
-          <RemovalDialog target={removal} close={() => setRemoval(null)} saved={async () => {
-            if (removal.kind === "technicians") { if (movement.technician === removal.id) movement.setTechnician("") }
-            else movement.setItems(current => current.filter(item => item.id !== removal.id))
-            setRemovalMessage(removal.archive ? "Item arquivado. O histórico foi preservado." : "Item excluído.")
-            await refresh()
-          }} />
+          <RemovalDialog
+            target={removal}
+            close={() => setRemoval(null)}
+            saved={async () => {
+              if (removal.kind === "technicians") {
+                if (movement.technician === removal.id)
+                  movement.setTechnician("")
+              } else
+                movement.setItems((current) =>
+                  current.filter((item) => item.id !== removal.id),
+                )
+              setRemovalMessage(
+                removal.archive
+                  ? "Item arquivado. O histórico foi preservado."
+                  : "Item excluído.",
+              )
+              await refresh()
+            }}
+          />
         )}
         {registration && (
           <Registration
@@ -271,8 +366,22 @@ export default function App({ email, onLogout }: { email: string; onLogout: () =
             saved={refresh}
           />
         )}
-        {view === "usuarios" && <UserRegistration onBusy={busy => { savingRef.current = busy; setSaving(busy) }} />}
-        {!loading && view === "painel" && <Dashboard products={products.filter(p => p.active)} routers={routerData} movements={movements} navigate={navigate} />}
+        {view === "usuarios" && (
+          <UserRegistration
+            onBusy={(busy) => {
+              savingRef.current = busy
+              setSaving(busy)
+            }}
+          />
+        )}
+        {!loading && view === "painel" && (
+          <Dashboard
+            products={products.filter((p) => p.active)}
+            routers={routerData}
+            movements={movements}
+            navigate={navigate}
+          />
+        )}
         {!loading && view === "movimentacao" && (
           <MovementView
             technician={movement.technician}
@@ -305,12 +414,28 @@ export default function App({ email, onLogout }: { email: string; onLogout: () =
         {view === "estoque" && (
           <InventoryView
             inventory={inventory}
-            archived={products.filter(p => !p.active).map(p => ({ item: p.name, category: "Produto", code: p.id, stock: p.quantity, status: "Arquivado" }))}
-            reactivate={id => reactivate("products", id)}
-            edit={(row) => { const product = products.find(p => p.id === row.code); if (product) setEditingProduct(product) }}
+            archived={products
+              .filter((p) => !p.active)
+              .map((p) => ({
+                item: p.name,
+                category: "Produto",
+                code: p.id,
+                stock: p.quantity,
+                status: "Arquivado",
+              }))}
+            reactivate={(id) => reactivate("products", id)}
+            edit={(row) => {
+              const product = products.find((p) => p.id === row.code)
+              if (product) setEditingProduct(product)
+            }}
             remove={(row) => {
               setRemovalMessage("")
-              setRemoval({ kind: "products", id: row.code, name: row.item, archive: hasHistory("products", row.code) })
+              setRemoval({
+                kind: "products",
+                id: row.code,
+                name: row.item,
+                archive: hasHistory("products", row.code),
+              })
             }}
             hasHistory={(id) => hasHistory("products", id)}
             busy={loading || saving}
@@ -318,17 +443,35 @@ export default function App({ email, onLogout }: { email: string; onLogout: () =
             create={() => setRegistration("products")}
           />
         )}
-        {view === "historico" && <HistoryView movements={movements} technicians={technicianData} products={products} routers={routerData} />}
+        {view === "historico" && (
+          <HistoryView
+            movements={movements}
+            technicians={technicianData}
+            products={products}
+            routers={routerData}
+          />
+        )}
         {view === "tecnicos" && (
           <TechniciansView
             technicians={technicians}
-            reactivate={id => reactivate("technicians", id)}
-            edit={(id) => { const person = technicianData.find(t => t.id === id); if (person) setEditingTechnician(person) }}
-            remove={(id) => {
-              const person = technicianData.find(t => t.id === id)
-              if (person) { setRemovalMessage(""); setRemoval({ kind: "technicians", id, name: person.name, archive: movements.some(m => m.technicianId === id) }) }
+            reactivate={(id) => reactivate("technicians", id)}
+            edit={(id) => {
+              const person = technicianData.find((t) => t.id === id)
+              if (person) setEditingTechnician(person)
             }}
-            hasHistory={(id) => movements.some(m => m.technicianId === id)}
+            remove={(id) => {
+              const person = technicianData.find((t) => t.id === id)
+              if (person) {
+                setRemovalMessage("")
+                setRemoval({
+                  kind: "technicians",
+                  id,
+                  name: person.name,
+                  archive: movements.some((m) => m.technicianId === id),
+                })
+              }
+            }}
+            hasHistory={(id) => movements.some((m) => m.technicianId === id)}
             busy={loading || saving}
             create={() => setRegistration("technicians")}
           />
@@ -338,7 +481,12 @@ export default function App({ email, onLogout }: { email: string; onLogout: () =
             routers={routers}
             remove={(row) => {
               setRemovalMessage("")
-              setRemoval({ kind: "routers", id: row.id, name: row.model + " · " + row.asset, archive: hasHistory("routers", row.id) })
+              setRemoval({
+                kind: "routers",
+                id: row.id,
+                name: row.model + " · " + row.asset,
+                archive: hasHistory("routers", row.id),
+              })
             }}
             hasHistory={(id) => hasHistory("routers", id)}
             busy={loading || saving}
@@ -349,4 +497,3 @@ export default function App({ email, onLogout }: { email: string; onLogout: () =
     </div>
   )
 }
-

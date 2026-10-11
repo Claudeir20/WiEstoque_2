@@ -14,6 +14,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.UUID;
+import dev.mota.stock_manager.dto.UpdateTechnicianRequest;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/technicians")
@@ -35,26 +38,26 @@ public class TechnicianController {
     }
 
     @GetMapping
-    public ResponseEntity<java.util.List<TechnicianResponse>> findAll() {
+    public ResponseEntity<List<TechnicianResponse>> findAll() {
         return ResponseEntity.ok(technicianService.findAll());
     }
     @PutMapping("/{id}")
-    public ResponseEntity<TechnicianResponse> update(@PathVariable UUID id, @RequestBody dev.mota.stock_manager.dto.UpdateTechnicianRequest request) {
+    public ResponseEntity<TechnicianResponse> update(@PathVariable UUID id, @RequestBody UpdateTechnicianRequest request) {
         return ResponseEntity.ok(technicianService.update(id, request));
     }
     @DeleteMapping("/{id}")
-    public java.util.Map<String, String> delete(@PathVariable UUID id) {
+    public Map<String, String> delete(@PathVariable UUID id) {
         technicianService.delete(id);
-        return java.util.Map.of("message", "Técnico excluído.");
+        return Map.of("message", "Técnico excluído.");
     }
     @PostMapping("/{id}/archive")
-    public java.util.Map<String, String> archive(@PathVariable UUID id) {
+    public Map<String, String> archive(@PathVariable UUID id) {
         technicianService.archive(id);
-        return java.util.Map.of("message", "Técnico arquivado. Histórico preservado.");
+        return Map.of("message", "Técnico arquivado. Histórico preservado.");
     }
     @PostMapping("/{id}/reactivate")
-    public java.util.Map<String, String> reactivate(@PathVariable UUID id) {
+    public Map<String, String> reactivate(@PathVariable UUID id) {
         technicianService.reactivate(id);
-        return java.util.Map.of("message", "Cadastro reativado. Histórico preservado.");
+        return Map.of("message", "Cadastro reativado. Histórico preservado.");
     }
 }

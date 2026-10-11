@@ -8,7 +8,11 @@ export type RemovalTarget = {
   archive: boolean
 }
 
-export default function RemovalDialog({ target, close, saved }: {
+export default function RemovalDialog({
+  target,
+  close,
+  saved,
+}: {
   target: RemovalTarget
   close: () => void
   saved: () => Promise<void>
@@ -30,18 +34,29 @@ export default function RemovalDialog({ target, close, saved }: {
     setSaving(true)
     setError("")
     try {
-      await api("/" + target.kind + "/" + target.id + (target.archive ? "/archive" : ""),
-        target.archive ? {} : undefined, target.archive ? "POST" : "DELETE")
+      await api(
+        "/" +
+          target.kind +
+          "/" +
+          target.id +
+          (target.archive ? "/archive" : ""),
+        target.archive ? {} : undefined,
+        target.archive ? "POST" : "DELETE",
+      )
       setDone(true)
       try {
         await saved()
       } catch {
-        setError("Operação concluída, mas a atualização falhou. Feche e use Atualizar dados.")
+        setError(
+          "Operação concluída, mas a atualização falhou. Feche e use Atualizar dados.",
+        )
         return
       }
       close()
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Não foi possível remover o item.")
+      setError(
+        e instanceof Error ? e.message : "Não foi possível remover o item.",
+      )
     } finally {
       pending.current = false
       setSaving(false)
@@ -49,21 +64,59 @@ export default function RemovalDialog({ target, close, saved }: {
   }
 
   return (
-    <dialog ref={dialog} className="card removal-dialog" aria-labelledby="removal-title"
-      onCancel={(event) => { event.preventDefault(); if (!pending.current) close() }}>
-      <h2 id="removal-title">{target.kind === "technicians" ? target.archive ? "Arquivar técnico" : "Excluir técnico" : target.archive ? "Arquivar item" : "Excluir item"}</h2>
+    <dialog
+      ref={dialog}
+      className="card removal-dialog"
+      aria-labelledby="removal-title"
+      onCancel={(event) => {
+        event.preventDefault()
+        if (!pending.current) close()
+      }}
+    >
+      <h2 id="removal-title">
+        {target.kind === "technicians"
+          ? target.archive
+            ? "Arquivar técnico"
+            : "Excluir técnico"
+          : target.archive
+            ? "Arquivar item"
+            : "Excluir item"}
+      </h2>
       <p className="removal-name">{target.name}</p>
-      <p>{target.archive
-        ? target.kind === "technicians" ? "O técnico ficará inativo e não poderá receber novas movimentações. O histórico será preservado." : "O item sairá do cadastro ativo e não poderá receber novas movimentações. O histórico será preservado."
-        : "O cadastro será excluído permanentemente. Esta ação não pode ser desfeita."}</p>
-      {error && <p className="removal-error" role="alert">{error}</p>}
+      <p>
+        {target.archive
+          ? target.kind === "technicians"
+            ? "O técnico ficará inativo e não poderá receber novas movimentações. O histórico será preservado."
+            : "O item sairá do cadastro ativo e não poderá receber novas movimentações. O histórico será preservado."
+          : "O cadastro será excluído permanentemente. Esta ação não pode ser desfeita."}
+      </p>
+      {error && (
+        <p className="removal-error" role="alert">
+          {error}
+        </p>
+      )}
       <div className="registration-actions">
-        <button autoFocus className="secondary-button" disabled={saving} onClick={close}>
+        <button
+          autoFocus
+          className="secondary-button"
+          disabled={saving}
+          onClick={close}
+        >
           {done ? "Fechar" : "Cancelar"}
         </button>
-        {!done && <button className="primary-button" disabled={saving} onClick={() => void confirm()}>
-          {saving ? "Aguarde…" : target.archive ? "Confirmar arquivamento" : "Confirmar exclusão"}
-        </button>}
+        {!done && (
+          <button
+            className="primary-button"
+            disabled={saving}
+            onClick={() => void confirm()}
+          >
+            {saving
+              ? "Aguarde…"
+              : target.archive
+                ? "Confirmar arquivamento"
+                : "Confirmar exclusão"}
+          </button>
+        )}
       </div>
     </dialog>
   )

@@ -1,5 +1,6 @@
 package dev.mota.stock_manager.entity;
 
+import dev.mota.stock_manager.exception.ConflictException;
 import dev.mota.stock_manager.validation.RouterIdentifiers;
 import dev.mota.stock_manager.enums.Status;
 import jakarta.persistence.*;
@@ -7,13 +8,14 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import jakarta.persistence.Version;
 
 @Entity
 @Getter
 @Table(name = "routers")
 public class Router {
 
-    @jakarta.persistence.Version
+    @Version
     private long version;
 
     @Id
@@ -45,7 +47,7 @@ public class Router {
     protected Router() {}
 
     public void ensureRemovable() {
-        if (!active) throw new IllegalArgumentException("Roteador já arquivado.");
+        if (!active) throw new ConflictException("Roteador já arquivado.");
         if (status != Status.IN_STOCK) {
             throw new IllegalArgumentException("Registre a devolução do roteador antes de excluir ou arquivar.");
         }
@@ -77,16 +79,16 @@ public class Router {
             String mac) {
 
         if (assetNumber == null ||  assetNumber.isBlank()){
-            throw new IllegalArgumentException("Asset number is required");
+            throw new IllegalArgumentException("Informe o patrimônio.");
         }
         if (model == null || model.isBlank()){
-            throw new IllegalArgumentException("Model is required");
+            throw new IllegalArgumentException("Informe o modelo.");
         }
         if (serialNumber == null || serialNumber.isBlank()){
-            throw new IllegalArgumentException("Serial number is required");
+            throw new IllegalArgumentException("Informe o número de série.");
         }
         if (mac == null || mac.isBlank()){
-            throw new IllegalArgumentException("Mac is required");
+            throw new IllegalArgumentException("Informe o MAC.");
         }
 
         return new Router(assetNumber, model,
@@ -97,7 +99,7 @@ public class Router {
     public void withdraw() {
         ensureActive();
         if (status != Status.IN_STOCK){
-            throw new IllegalArgumentException(" Only Router in stock can be deactivated");
+            throw new IllegalArgumentException("Roteador " + assetNumber + " já está fora do estoque.");
         }
         this.status = Status.OUT_OF_STOCK;
     }
@@ -105,7 +107,7 @@ public class Router {
     public void returnStock() {
         ensureActive();
         if (status != Status.OUT_OF_STOCK){
-            throw new IllegalArgumentException("Router is already in stock");
+            throw new IllegalArgumentException("Roteador " + assetNumber + " já está no estoque.");
         }
 
         this.status = Status.IN_STOCK;

@@ -9,8 +9,12 @@ export type TechnicianRow = {
   status: string
 }
 export default function TechniciansView({
-  technicians, reactivate,
-  edit, remove, hasHistory, busy,
+  technicians,
+  reactivate,
+  edit,
+  remove,
+  hasHistory,
+  busy,
   create,
 }: {
   edit: (id: string) => void
@@ -45,10 +49,34 @@ export default function TechniciansView({
             <h2>{person.name}</h2>
             <p>{person.route}</p>
             <div className="registration-actions">
-              {person.status !== "Ativo" && <button className="secondary-button" disabled={busy} onClick={() => reactivate(person.id)}>Reativar</button>}
-              <button className="secondary-button" disabled={busy || person.status !== "Ativo"} onClick={() => edit(person.id)}>Editar</button>
-              <button className="secondary-button removal-button" disabled={busy || (person.status !== "Ativo" && hasHistory(person.id))} onClick={() => remove(person.id)}>
-                {hasHistory(person.id) ? person.status === "Ativo" ? "Arquivar" : "Arquivado" : "Excluir"}
+              {person.status !== "Ativo" && (
+                <button
+                  className="secondary-button"
+                  disabled={busy}
+                  onClick={() => reactivate(person.id)}
+                >
+                  Reativar
+                </button>
+              )}
+              <button
+                className="secondary-button"
+                disabled={busy || person.status !== "Ativo"}
+                onClick={() => edit(person.id)}
+              >
+                Editar
+              </button>
+              <button
+                className="secondary-button removal-button"
+                disabled={
+                  busy || (person.status !== "Ativo" && hasHistory(person.id))
+                }
+                onClick={() => remove(person.id)}
+              >
+                {hasHistory(person.id)
+                  ? person.status === "Ativo"
+                    ? "Arquivar"
+                    : "Arquivado"
+                  : "Excluir"}
               </button>
             </div>
           </article>

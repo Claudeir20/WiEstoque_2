@@ -14,6 +14,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/movements")
@@ -35,7 +36,7 @@ public class MovementController {
     }
 
     @GetMapping
-    public ResponseEntity<java.util.List<MovementResponse>> findAll() {
+    public ResponseEntity<List<MovementResponse>> findAll() {
         return ResponseEntity.ok(movementService.findAll());
     }
 }

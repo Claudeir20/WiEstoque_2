@@ -1,7 +1,13 @@
 import { useState } from "react"
 import { usePagination } from "../Pagination"
 import Icon from "../components/Icon"
-import { Badge, EmptyState, ExportButtons, Metric, PageHeader } from "../components/ui"
+import {
+  Badge,
+  EmptyState,
+  ExportButtons,
+  Metric,
+  PageHeader,
+} from "../components/ui"
 
 export type InventoryRow = {
   item: string
@@ -11,7 +17,9 @@ export type InventoryRow = {
   status: string
 }
 export default function InventoryView({
-  inventory, archived, reactivate,
+  inventory,
+  archived,
+  reactivate,
   edit,
   monthWithdrawals,
   create,
@@ -42,7 +50,14 @@ export default function InventoryView({
         title="Estoque de materiais"
         description="Acompanhe consumíveis e materiais de instalação. Roteadores são controlados em um estoque separado."
         action={
-          <ExportButtons name="estoque" rows={rows.map(row => ({ "Material": row.item, "Quantidade": row.stock, "Status": row.status }))} />
+          <ExportButtons
+            name="estoque"
+            rows={rows.map((row) => ({
+              Material: row.item,
+              Quantidade: row.stock,
+              Status: row.status,
+            }))}
+          />
         }
       />
       <button className="primary-button" onClick={create}>
@@ -71,7 +86,22 @@ export default function InventoryView({
           warning
         />
       </div>
-      <div className="row-actions"><button className="secondary-button" aria-pressed={!showArchived} onClick={() => setShowArchived(false)}>Ativos ({inventory.length})</button><button className="secondary-button" aria-pressed={showArchived} onClick={() => setShowArchived(true)}>Arquivados ({archived.length})</button></div>
+      <div className="row-actions">
+        <button
+          className="secondary-button"
+          aria-pressed={!showArchived}
+          onClick={() => setShowArchived(false)}
+        >
+          Ativos ({inventory.length})
+        </button>
+        <button
+          className="secondary-button"
+          aria-pressed={showArchived}
+          onClick={() => setShowArchived(true)}
+        >
+          Arquivados ({archived.length})
+        </button>
+      </div>
       <section className="card table-card">
         <div className="table-toolbar">
           <div>
@@ -120,16 +150,40 @@ export default function InventoryView({
                     </Badge>
                   </td>
                   <td>
-                    {showArchived ? <button className="secondary-button" disabled={busy} onClick={() => reactivate(row.code)}>Reativar</button> : <div className="row-actions">
-                    <button className="secondary-button" disabled={busy} onClick={() => edit(row)}>Editar</button>
-                    <button className="secondary-button removal-button"
-                      disabled={busy || row.stock !== 0}
-                      title={row.stock !== 0 ? "O saldo deve ser zero para remover este material." : undefined}
-                      onClick={() => remove(row)}>
-                      {hasHistory(row.code) ? "Arquivar" : "Excluir"}
-                    </button>
-                    </div>}
-                    {!showArchived && row.stock !== 0 && <small className="removal-hint">Requer saldo zero</small>}
+                    {showArchived ? (
+                      <button
+                        className="secondary-button"
+                        disabled={busy}
+                        onClick={() => reactivate(row.code)}
+                      >
+                        Reativar
+                      </button>
+                    ) : (
+                      <div className="row-actions">
+                        <button
+                          className="secondary-button"
+                          disabled={busy}
+                          onClick={() => edit(row)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="secondary-button removal-button"
+                          disabled={busy || row.stock !== 0}
+                          title={
+                            row.stock !== 0
+                              ? "O saldo deve ser zero para remover este material."
+                              : undefined
+                          }
+                          onClick={() => remove(row)}
+                        >
+                          {hasHistory(row.code) ? "Arquivar" : "Excluir"}
+                        </button>
+                      </div>
+                    )}
+                    {!showArchived && row.stock !== 0 && (
+                      <small className="removal-hint">Requer saldo zero</small>
+                    )}
                   </td>
                 </tr>
               ))}

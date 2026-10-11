@@ -97,26 +97,44 @@ export default function Registration({
                 name={name}
                 autoFocus={fields[0][0] === name}
                 autoComplete="off"
-                onKeyDown={event => {
+                onKeyDown={(event) => {
                   if (kind !== "routers" || event.key !== "Enter") return
                   event.preventDefault()
                   if (!event.currentTarget.reportValidity()) return
-                  const inputs = Array.from(event.currentTarget.form?.querySelectorAll<HTMLInputElement>("input") || [])
+                  const inputs = Array.from(
+                    event.currentTarget.form?.querySelectorAll<HTMLInputElement>(
+                      "input",
+                    ) || [],
+                  )
                   const next = inputs[inputs.indexOf(event.currentTarget) + 1]
                   if (next) next.focus()
-                  else event.currentTarget.form?.querySelector<HTMLButtonElement>('button[type="submit"]')?.focus()
+                  else
+                    event.currentTarget.form
+                      ?.querySelector<HTMLButtonElement>(
+                        'button[type="submit"]',
+                      )
+                      ?.focus()
                 }}
                 onChange={(event) => {
                   if (kind === "routers" && name === "serialNumber") {
-                    event.currentTarget.value = event.currentTarget.value.toUpperCase()
+                    event.currentTarget.value =
+                      event.currentTarget.value.toUpperCase()
                   }
                   if (kind === "routers" && name === "mac") {
-                    event.currentTarget.value = formatMac(event.currentTarget.value)
+                    event.currentTarget.value = formatMac(
+                      event.currentTarget.value,
+                    )
                   }
                 }}
                 onBlur={(event) => {
-                  if (kind === "routers" && name === "serialNumber" && event.currentTarget.value.trim()) {
-                    event.currentTarget.value = normalizeSerial(event.currentTarget.value)
+                  if (
+                    kind === "routers" &&
+                    name === "serialNumber" &&
+                    event.currentTarget.value.trim()
+                  ) {
+                    event.currentTarget.value = normalizeSerial(
+                      event.currentTarget.value,
+                    )
                   }
                 }}
                 required
@@ -141,7 +159,11 @@ export default function Registration({
             >
               {persisted ? "Fechar" : "Cancelar"}
             </button>
-            <button type="submit" className="primary-button" disabled={saving || persisted}>
+            <button
+              type="submit"
+              className="primary-button"
+              disabled={saving || persisted}
+            >
               {saving ? "Salvando…" : "Cadastrar"}
             </button>
           </div>

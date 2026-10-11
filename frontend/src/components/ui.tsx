@@ -76,37 +76,121 @@ export function Metric({
   )
 }
 
-export function ExportButtons({ name, rows, label = "Exportar" }: { name: string; rows: ExportRow[]; label?: string }) {
+export function ExportButtons({
+  name,
+  rows,
+  label = "Exportar",
+}: {
+  name: string
+  rows: ExportRow[]
+  label?: string
+}) {
   const [format, setFormat] = useState("xlsx")
   const [busy, setBusy] = useState(false)
   const pending = useRef(false)
   const [error, setError] = useState("")
   async function download() {
     if (pending.current || !rows.length) return
-    pending.current = true; setBusy(true); setError("")
+    pending.current = true
+    setBusy(true)
+    setError("")
     try {
       if (format === "xlsx") {
         const data = await makeExcel(rows)
-        downloadFile(name + ".xlsx", data as BlobPart, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-      } else downloadFile(name + ".csv", makeCsv(rows), "text/csv;charset=utf-8")
-    } catch { setError("Não foi possível exportar. Tente novamente.") }
-    finally { pending.current = false; setBusy(false) }
+        downloadFile(
+          name + ".xlsx",
+          data as BlobPart,
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+      } else
+        downloadFile(name + ".csv", makeCsv(rows), "text/csv;charset=utf-8")
+    } catch {
+      setError("Não foi possível exportar. Tente novamente.")
+    } finally {
+      pending.current = false
+      setBusy(false)
+    }
   }
-  return <div className="export-control">
-    <div><select aria-label={"Formato de " + label.toLowerCase()} value={format} disabled={busy} onChange={e => setFormat(e.target.value)}><option value="xlsx">Excel (.xlsx)</option><option value="csv">CSV</option></select>
-    <button className="secondary-button" disabled={busy || !rows.length} onClick={() => void download()}><Icon name="download" size={18} />{busy ? "Gerando…" : label}</button></div>
-    {error && <small role="alert" className="removal-error">{error}</small>}
-  </div>
+  return (
+    <div className="export-control">
+      <div>
+        <select
+          aria-label={"Formato de " + label.toLowerCase()}
+          value={format}
+          disabled={busy}
+          onChange={(e) => setFormat(e.target.value)}
+        >
+          <option value="xlsx">Excel (.xlsx)</option>
+          <option value="csv">CSV</option>
+        </select>
+        <button
+          className="secondary-button"
+          disabled={busy || !rows.length}
+          onClick={() => void download()}
+        >
+          <Icon name="download" size={18} />
+          {busy ? "Gerando…" : label}
+        </button>
+      </div>
+      {error && (
+        <small role="alert" className="removal-error">
+          {error}
+        </small>
+      )}
+    </div>
+  )
 }
 
-export function QuantityInput({ value, max, disabled, change }: { value: number; max: number; disabled: boolean; change: (n: number) => void }) {
+export function QuantityInput({
+  value,
+  max,
+  disabled,
+  change,
+}: {
+  value: number
+  max: number
+  disabled: boolean
+  change: (n: number) => void
+}) {
   const [text, setText] = useState(String(value))
   const [error, setError] = useState("")
-  useEffect(() => { setText(String(value)); setError("") }, [value])
+  useEffect(() => {
+    setText(String(value))
+    setError("")
+  }, [value])
   function commit() {
     const n = Number(text)
-    if (!/^\d+$/.test(text) || !Number.isSafeInteger(n) || n < 1 || n > max) { setText(String(value)); setError(`Informe uma quantidade inteira entre 1 e ${max}.`); return }
-    setError(""); change(n)
+    if (!/^\d+$/.test(text) || !Number.isSafeInteger(n) || n < 1 || n > max) {
+      setText(String(value))
+      setError(`Informe uma quantidade inteira entre 1 e ${max}.`)
+      return
+    }
+    setError("")
+    change(n)
   }
-  return <label className="quantity-input"><input aria-label="Quantidade do material" type="number" min={1} max={max} step={1} disabled={disabled} value={text} onChange={e => {setText(e.target.value);setError("")}} onBlur={commit} onKeyDown={e => { if(e.key === "Enter") {e.preventDefault(); e.currentTarget.blur()} }} />{error && <small role="alert">{error}</small>}</label>
+  return (
+    <label className="quantity-input">
+      <input
+        aria-label="Quantidade do material"
+        type="number"
+        min={1}
+        max={max}
+        step={1}
+        disabled={disabled}
+        value={text}
+        onChange={(e) => {
+          setText(e.target.value)
+          setError("")
+        }}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault()
+            e.currentTarget.blur()
+          }
+        }}
+      />
+      {error && <small role="alert">{error}</small>}
+    </label>
+  )
 }
