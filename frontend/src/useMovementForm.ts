@@ -14,7 +14,14 @@ type Options = {
 
 // Estado e regras do formulário de nova movimentação. Fica no App para o
 // formulário não ser perdido ao navegar entre as telas.
-export function useMovementForm({ products, routerData, savingRef, setSaving, setError, refresh }: Options) {
+export function useMovementForm({
+  products,
+  routerData,
+  savingRef,
+  setSaving,
+  setError,
+  refresh,
+}: Options) {
   const [movementType, setMovementType] = useState<MovementType>("Saída")
   const [technician, setTechnician] = useState("")
   const [entryOrigin, setEntryOrigin] = useState("Compra para reposição")
@@ -28,24 +35,39 @@ export function useMovementForm({ products, routerData, savingRef, setSaving, se
     [items],
   )
 
-
-  const candidates = searchMovementItems(products, routerData, query, movementType)
+  const candidates = searchMovementItems(
+    products,
+    routerData,
+    query,
+    movementType,
+  )
   function addItem(event: FormEvent) {
     event.preventDefault()
     if (savingRef.current) return
-    const exact = candidates.filter(item => item.exact)
+    const exact = candidates.filter((item) => item.exact)
     const matches = exact.length ? exact : candidates
     if (!query.trim()) return
     if (matches.length !== 1) {
-      setError(matches.length ? "Escolha um dos resultados da busca para adicionar." : "Item não encontrado. Confira o nome ou código informado.")
+      setError(
+        matches.length
+          ? "Escolha um dos resultados da busca para adicionar."
+          : "Item não encontrado. Confira o nome ou código informado.",
+      )
       return
     }
     selectItem(matches[0].id)
   }
-  
+
   function selectItem(id: string) {
     if (savingRef.current) return
-    const candidate = candidates.find(item => item.id === id) ?? searchMovementItems(products, routerData, routerData.find(r => r.id === id)?.assetNumber ?? "", movementType).find(item => item.id === id)
+    const candidate =
+      candidates.find((item) => item.id === id) ??
+      searchMovementItems(
+        products,
+        routerData,
+        routerData.find((r) => r.id === id)?.assetNumber ?? "",
+        movementType,
+      ).find((item) => item.id === id)
     if (!candidate) return
     setError("")
     setSubmitted(false)
@@ -63,7 +85,6 @@ export function useMovementForm({ products, routerData, savingRef, setSaving, se
       }
     }
 
-
     const existing = items.find((i) => i.id === candidate.id)
     if (
       movementType === "Saída" &&
@@ -77,7 +98,14 @@ export function useMovementForm({ products, routerData, savingRef, setSaving, se
         ? current.map((i) =>
             i.id === candidate.id ? { ...i, quantity: i.quantity + 1 } : i,
           )
-        : [...current, { ...candidate, detail: candidate.type === "PRODUCT" ? "Produto" : candidate.detail }],
+        : [
+            ...current,
+            {
+              ...candidate,
+              detail:
+                candidate.type === "PRODUCT" ? "Produto" : candidate.detail,
+            },
+          ],
     )
     setQuery("")
   }
@@ -98,7 +126,18 @@ export function useMovementForm({ products, routerData, savingRef, setSaving, se
   }
   function setQuantity(id: string, quantity: number) {
     if (savingRef.current) return
-    setItems(current => current.map(i => i.id === id && Number.isInteger(quantity) && quantity > 0 && quantity <= 2147483647 && (i.type !== "ROUTER" || quantity === 1) && (movementType !== "Saída" || quantity <= (i.available ?? 0)) ? { ...i, quantity } : i))
+    setItems((current) =>
+      current.map((i) =>
+        i.id === id &&
+        Number.isInteger(quantity) &&
+        quantity > 0 &&
+        quantity <= 2147483647 &&
+        (i.type !== "ROUTER" || quantity === 1) &&
+        (movementType !== "Saída" || quantity <= (i.available ?? 0))
+          ? { ...i, quantity }
+          : i,
+      ),
+    )
     setSubmitted(false)
   }
   function removeItem(id: string) {
@@ -169,15 +208,33 @@ export function useMovementForm({ products, routerData, savingRef, setSaving, se
   function setClientCode(id: string, value: string) {
     if (!savingRef.current)
       setItems((current) =>
-        current.map((i) =>
-          i.id === id ? { ...i, clientCode: value } : i,
-        ),
+        current.map((i) => (i.id === id ? { ...i, clientCode: value } : i)),
       )
   }
 
   return {
-    movementType, changeMovementType, technician, setTechnician, entryOrigin, setEntryOrigin,
-    note, setNote, query, setQuery, items, setItems, submitted, setSubmitted, totalUnits,
-    candidates, addItem, selectItem, changeQuantity, setQuantity, removeItem, setClientCode, registerMovement,
+    movementType,
+    changeMovementType,
+    technician,
+    setTechnician,
+    entryOrigin,
+    setEntryOrigin,
+    note,
+    setNote,
+    query,
+    setQuery,
+    items,
+    setItems,
+    submitted,
+    setSubmitted,
+    totalUnits,
+    candidates,
+    addItem,
+    selectItem,
+    changeQuantity,
+    setQuantity,
+    removeItem,
+    setClientCode,
+    registerMovement,
   }
 }

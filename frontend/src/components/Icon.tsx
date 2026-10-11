@@ -1,6 +1,9 @@
 import { type ReactNode } from "react"
 
-export default function Icon({ name, size = 20 }: {
+export default function Icon({
+  name,
+  size = 20,
+}: {
   name: string
   size?: number
 }) {
