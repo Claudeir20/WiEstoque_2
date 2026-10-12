@@ -20,9 +20,9 @@ WITH pendentes (ordem, dia, tecnico, tecnico_alt, material, material_alt, patrim
     (15, DATE '2026-10-09', 'JHONATAN',       NULL,             'FITA ISOLANTE',             NULL,               NULL,    1),
     (16, DATE '2026-10-09', 'JHONATAN',       NULL,             NULL,                        NULL,               '21574', 1),
     (17, DATE '2026-10-09', 'JHONATAN',       NULL,             NULL,                        NULL,               '21033', 1),
-    (18, DATE '2026-10-08', 'WESLEY',         NULL,             'CABO LC/UPC - LC/UPC AZUL', NULL,               NULL,    1),
-    (19, DATE '2026-10-08', 'WESLEY',         NULL,             'CORDAO AMARELO',            NULL,               NULL,    1),
-    (20, DATE '2026-10-08', 'PAULO VINICIUS', 'VINICIUS PAULO', 'CABO LC/UPC - LC/UPC AZUL', NULL,               NULL,    1),
+    (18, DATE '2026-10-08', 'WESLEY',         'WESLLEY',        'CABO LC/UPC - LC/UPC AZUL', 'CORDAO AZUL',      NULL,    1),
+    (19, DATE '2026-10-08', 'WESLEY',         'WESLLEY',        'CORDAO AMARELO',            NULL,               NULL,    1),
+    (20, DATE '2026-10-08', 'PAULO VINICIUS', 'VINICIUS PAULO', 'CABO LC/UPC - LC/UPC AZUL', 'CORDAO AZUL',      NULL,    1),
     (21, DATE '2026-10-08', 'JHONATAN',       NULL,             NULL,                        NULL,               '21599', 1),
     (22, DATE '2026-10-08', 'JHONATAN',       NULL,             NULL,                        NULL,               '21348', 1)
 ),

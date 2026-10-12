@@ -15,7 +15,7 @@ Os scripts lançam essas saídas no banco do Neon com a data original. Eles tamb
 - Cada técnico ganha uma movimentação por dia, com todos os itens dele naquele dia, no horário de 12h.
 - Os roteadores são localizados pelo patrimônio.
 - Os materiais e os técnicos são localizados pelo nome, sem diferenciar maiúsculas de minúsculas.
-- Equivalências usadas: CABO DROP também é procurado como "Bobina Cabo Drop", e PAULO VINICIUS também como "VINICIUS PAULO".
+- Equivalências usadas: CABO DROP também é procurado como "Bobina Cabo Drop", PAULO VINICIUS também como "VINICIUS PAULO", WESLEY também como "WESLLEY" e CABO LC/UPC - LC/UPC AZUL também como "CORDAO AZUL".
 - Todas as movimentações recebem a observação "Lançamento retroativo do sistema local (08 a 10/10/2026)".
 
 ## Passo a passo
