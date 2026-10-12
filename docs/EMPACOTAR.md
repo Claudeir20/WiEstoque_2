@@ -6,7 +6,7 @@ Na raiz do projeto, execute no PowerShell com Java 21 e pnpm disponíveis:
 .\empacotar.ps1
 ```
 
-O script verifica TypeScript, compila o React com API no mesmo domínio, executa os testes AuthenticationIntegrationTest e gera backend/target/stock-manager-0.0.1-SNAPSHOT.jar. Não executa toda a suíte do backend. O perfil Maven with-frontend inclui frontend/dist em BOOT-INF/classes/static, sem copiar arquivos gerados para src.
+O script verifica TypeScript, compila o React com API no mesmo domínio, executa todos os testes do backend e gera backend/target/stock-manager-0.0.1-SNAPSHOT.jar, como o build do Render. O perfil Maven with-frontend inclui frontend/dist em BOOT-INF/classes/static, sem copiar arquivos gerados para src.
 
 Para testar o JAR localmente, configure DB_PASSWORD no terminal (as variáveis configuradas no IntelliJ não são herdadas pelo terminal). Não ative prod ao testar por HTTP:
 
@@ -19,4 +19,4 @@ Abra http://localhost:8081. A porta 8081 permite manter o backend do IntelliJ na
 
 A tela de login, JavaScript, CSS e logo são públicos. As APIs permanecem protegidas, com CSRF e cadastro restrito a ADMIN. O frontend em desenvolvimento continua usando o proxy /api do Vite; o frontend empacotado chama /auth, /users e as demais APIs diretamente no mesmo domínio.
 
-Após alterar o frontend, gere novamente o JAR pelo script. O Render usa o Dockerfile da raiz para publicar a aplicação com HTTPS. Consulte README.md para configurar e atualizar o serviço.
+Após alterar o frontend, gere novamente o JAR pelo script. O Render usa o Dockerfile da raiz para publicar a aplicação com HTTPS. Consulte o [README](../README.md#publicação) para configurar e atualizar o serviço.
