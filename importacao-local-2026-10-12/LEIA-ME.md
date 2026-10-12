@@ -20,8 +20,8 @@ Os scripts lançam essas saídas no banco do Neon com a data original. Eles tamb
 
 ## Passo a passo
 
-1. **Faça um backup no Neon.** No console do Neon (console.neon.tech), abra o projeto e vá em **Branches**. Crie uma branch a partir da `main` com o nome `antes-lancamento-local`. Se algo der errado, essa branch tem o banco exatamente como estava.
-2. **Abra o SQL Editor.** No menu do projeto, entre em **SQL Editor** e confira se o banco e a branch selecionados no topo são os de produção (a `main`).
+1. **Faça um backup no Neon.** No console do Neon (console.neon.tech), abra o projeto e vá em **Branches**. Clique em **New Branch** e crie uma branch com o nome `antes-lancamento-local`, com Parent branch `production` e a opção **Branch data and schema**. Em Auto-delete, escolha um prazo de pelo menos 7 dias. Se algo der errado, essa branch tem o banco exatamente como estava.
+2. **Abra o SQL Editor.** No menu do projeto, entre em **SQL Editor** e confira se o banco e a branch selecionados no topo são os de produção (a `production`).
 3. **Rode a conferência.** Abra `1-conferencia.sql`, copie todo o conteúdo, cole no editor e clique em **Run**. Aparecem 22 linhas. Confira a coluna `situacao`:
    - Se todas estiverem `OK`, siga para o passo 4.
    - Se alguma não estiver `OK`, não rode o passo 4. A mensagem diz o que falta, por exemplo técnico ou material com outro nome, roteador já fora do estoque ou saldo insuficiente.
