@@ -103,21 +103,43 @@ Quando aparecer `Started StockManagerApplication`, abra `https://DOMINIO` no nav
 
 ## 7. Migrar os dados do Neon (opcional)
 
-Para levar os dados atuais em vez de começar com o banco vazio, faça isto antes do `docker compose up` do passo 6, com o banco do RDS ainda vazio. Na EC2:
+Para levar os dados atuais em vez de começar com o banco vazio. Durante a migração, evite lançamentos no sistema do Render; o que for gravado lá depois da cópia não vai para a AWS. Os usuários também vêm do Neon: depois da migração, entre com o login do Render.
+
+Na EC2, dentro de `~/WiEstoque_2/aws`, guarde as credenciais em variáveis (o texto colado não aparece na tela nem fica no histórico):
 
 ```bash
-docker run --rm postgres:17 \
-  pg_dump 'postgresql://USUARIO_NEON:SENHA_NEON@HOST_NEON/BANCO_NEON?sslmode=require' \
-  --no-owner --no-privileges -Fc > neon.dump
-
-docker run --rm -i -e PGPASSWORD='SENHA_RDS' postgres:17 \
-  pg_restore -h ENDPOINT_RDS -U wiestoque -d wiestoque \
-  --no-owner --no-privileges < neon.dump
+read -rsp "URL do Neon: " NEON; echo        # cole a URL de Connect (sem pooling)
+read -rsp "Senha do RDS: " PGPASSWORD; echo; export PGPASSWORD
+RDS=ENDPOINT_DO_RDS
 ```
 
-Os dados de conexão do Neon estão no painel dele (**Connection details**). O dump inclui a tabela do Flyway, então as migrações não são reaplicadas. Confira as contagens no sistema e apague `neon.dump` da EC2 depois.
+Copie o Neon. A versão da imagem precisa ser igual ou maior que a do servidor do Neon (o Neon usa PostgreSQL 18; com `postgres:17` o `pg_dump` falha com *server version mismatch*):
 
-Durante a migração, evite lançamentos no sistema do Render; o que for gravado lá depois do dump não vai para a AWS.
+```bash
+docker run --rm postgres:18 pg_dump "$NEON" -n public --no-owner --no-privileges -Fc > neon.dump && ls -lh neon.dump
+```
+
+Se a aplicação já subiu (o Flyway criou as tabelas), pare-a e esvazie o banco antes de restaurar:
+
+```bash
+docker compose stop app
+psql "host=$RDS dbname=wiestoque user=wiestoque sslmode=require" -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'
+```
+
+Restaure. O erro `schema "public" already exists` é esperado e pode ser ignorado:
+
+```bash
+docker run --rm -i -e PGPASSWORD postgres:18 pg_restore -h $RDS -U wiestoque -d wiestoque --no-owner --no-privileges < neon.dump
+```
+
+Confira as contagens com o sistema do Render, suba a aplicação e apague a cópia e as variáveis:
+
+```bash
+psql "host=$RDS dbname=wiestoque user=wiestoque sslmode=require" -c "select (select count(*) from products) materiais, (select count(*) from routers) roteadores, (select count(*) from technicians) tecnicos, (select count(*) from movements) movimentacoes, (select count(*) from users) usuarios;"
+docker compose start app && rm -f neon.dump && unset NEON PGPASSWORD
+```
+
+O dump inclui a tabela do Flyway, então as migrações não são reaplicadas.
 
 ## Atualizar a versão
 
