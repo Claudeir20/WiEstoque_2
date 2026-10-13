@@ -42,7 +42,7 @@ Em **RDS > Create database**:
 5. **Single-AZ** (sem Multi-AZ, que dobra o custo).
 6. Conectividade: **Public access = No**; grupo de segurança `wiestoque-db` (remova o `default`).
 7. Desative **Performance Insights** e **Enhanced monitoring**.
-8. Em **Additional configuration**, preencha **Initial database name** com `wiestoque`. Mantenha os backups automáticos (7 dias).
+8. Em **Additional configuration**, preencha **Initial database name** com `wiestoque`. Mantenha o backup automático ligado; no plano gratuito, a retenção máxima é de **1 dia** (um valor maior faz a criação falhar). Marque também a **proteção contra exclusão**.
 9. Crie e aguarde o status **Available**. Copie o **Endpoint** em **Connectivity & security**.
 
 ## 5. Servidor na EC2
