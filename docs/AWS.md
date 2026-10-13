@@ -87,7 +87,7 @@ nano .env
 
 | Variável | Valor |
 | --- | --- |
-| `DOMINIO` | IP elástico com traços + `.sslip.io` (ex.: `18-220-10-20.sslip.io`) ou um domínio próprio apontado para o IP |
+| `DOMINIO` | Um nome apontado para o IP elástico: subdomínio gratuito do DuckDNS (ex.: `wiestoque.duckdns.org`, com o **current ip** trocado para o IP elástico), domínio próprio com registro `A`, ou o IP com traços + `.sslip.io` (ex.: `18-220-10-20.sslip.io`). Para trocar depois, altere e rode `docker compose up -d` |
 | `DATABASE_URL` | `jdbc:postgresql://ENDPOINT:5432/wiestoque?sslmode=require` |
 | `DATABASE_USER` / `DATABASE_PASSWORD` | Usuário e senha do RDS |
 | `INITIAL_ADMIN_EMAIL` / `INITIAL_ADMIN_PASSWORD` | Só se o banco estiver vazio e você não for migrar os dados (veja [Login e permissões](LOGIN.md)) |
