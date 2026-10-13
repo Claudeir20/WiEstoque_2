@@ -1,0 +1,35 @@
+# Executa o WiEstoque em uma EC2: a aplicação atrás do Caddy, que obtém o certificado HTTPS.
+# O banco fica no RDS; as variáveis de conexão estão no arquivo .env desta pasta.
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: wiestoque:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      PORT: "8080"
+      TZ: America/Sao_Paulo
+    expose:
+      - "8080"
+
+  caddy:
+    image: caddy:2.10
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMINIO: ${DOMINIO}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_dados:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_dados:
+  caddy_config:

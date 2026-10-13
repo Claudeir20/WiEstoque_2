@@ -95,6 +95,8 @@ Variáveis de ambiente do serviço no Render (nunca versione senhas):
 
 No plano gratuito, o serviço "dorme" após 15 minutos sem acesso, e o primeiro acesso seguinte leva cerca de 2 minutos.
 
+Para publicar em uma conta AWS (EC2 com Docker e banco no RDS), siga o guia [Publicação na AWS](docs/AWS.md).
+
 ## Backup
 
 Faça backups periódicos do banco Neon e guarde uma cópia em outro local. As exportações em Excel ou CSV das telas não substituem um backup completo. Antes de migrações ou importações, faça um backup do banco de destino.
