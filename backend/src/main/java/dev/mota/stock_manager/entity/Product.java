@@ -129,7 +129,7 @@ public class Product {
         if (quantity > this.quantity){
             throw new IllegalArgumentException("Saldo insuficiente de " + name + ". Disponível: " + this.quantity + ".");
         }
-        this.quantity += quantity;
+        this.quantity -= quantity;
     }
 
     public void reactivate() {
