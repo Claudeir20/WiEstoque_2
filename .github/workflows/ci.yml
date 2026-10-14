@@ -7,7 +7,10 @@ on:                           # 1. QUANDO roda
 
 jobs:                         # 2. O QUE roda (jobs em paralelo)
   backend:
-    runs-on: ubuntu-latest    #    máquina emprestada pelo GitHub
+    runs-on: ubuntu-latest#    máquina emprestada pelo GitHub
+    defaults:
+      run:
+        working-directory: backend
     steps:                    # 3. PASSO A PASSO de cada job
       - uses: actions/checkout@v4        # "uses" = ação pronta da comunidade
       - uses: actions/setup-java@v5
