@@ -7,7 +7,7 @@ on:                           # 1. QUANDO roda
 
 jobs:                         # 2. O QUE roda (jobs em paralelo)
   backend:
-    runs-on: ubuntu-latest#    máquina emprestada pelo GitHub
+    runs-on: ubuntu-latest    # máquina emprestada pelo GitHub
     defaults:
       run:
         working-directory: backend
