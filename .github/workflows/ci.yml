@@ -10,5 +10,9 @@ jobs:                         # 2. O QUE roda (jobs em paralelo)
     runs-on: ubuntu-latest    #    máquina emprestada pelo GitHub
     steps:                    # 3. PASSO A PASSO de cada job
       - uses: actions/checkout@v4        # "uses" = ação pronta da comunidade
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
       - run: sh ./mvnw -B test           # "run"  = comando de terminal
