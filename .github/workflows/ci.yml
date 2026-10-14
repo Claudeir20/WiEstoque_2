@@ -1,0 +1,21 @@
+name: CI                      # nome que aparece na aba Actions
+
+on:                           # 1. QUANDO roda
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:                         # 2. O QUE roda (jobs em paralelo)
+  backend:
+    runs-on: ubuntu-latest    # máquina emprestada pelo GitHub
+    defaults:
+      run:
+        working-directory: backend
+    steps:                    # 3. PASSO A PASSO de cada job
+      - uses: actions/checkout@v4        # "uses" = ação pronta da comunidade
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - run: sh ./mvnw -B test           # "run"  = comando de terminal
