@@ -4,7 +4,7 @@
 
 O WiEstoque controla os materiais e os roteadores do estoque da WiNET: cadastros, saldos, saídas, devoluções, entradas e consultas, em uma aplicação acessada pelo navegador.
 
-Sistema em produção: https://wiestoque-2.onrender.com
+Sistema em produção: https://wiestoque.duckdns.org (AWS)
 
 ## Por que o sistema foi criado
 
@@ -33,8 +33,8 @@ O funcionamento detalhado de cada tela está no [manual de uso](docs/MANUAL.md).
 | Interface | React 19, TypeScript, Vite 8 e Tailwind CSS 4 |
 | API | Java 21, Spring Boot 4, Spring Security e Spring Data JPA |
 | Banco | PostgreSQL, com migrações Flyway |
-| Testes | JUnit com H2 em memória e testes do frontend com Node.js |
-| Publicação | Docker no Render, banco no Neon |
+| Testes | JUnit com H2 em memória e testes do frontend com Node.js, executados no GitHub Actions |
+| Publicação | Docker na AWS (EC2), banco no RDS PostgreSQL, HTTPS com Caddy |
 
 ```text
 ├── backend/                          API Java: controllers, serviços, entidades e testes
@@ -44,9 +44,11 @@ O funcionamento detalhado de cada tela está no [manual de uso](docs/MANUAL.md).
 │   ├── src/dialogs/                  Janelas de cadastro, edição e remoção
 │   ├── src/components/               Componentes visuais compartilhados
 │   └── tests/                        Testes das regras do frontend
-├── docs/                             Manual, desenvolvimento, login e empacotamento
+├── aws/                              Docker Compose, Caddy e script de preparação da EC2
+├── docs/                             Manual, desenvolvimento, login, empacotamento e AWS
 ├── importacao-planilha-2026-10-07/   Relatório da importação inicial das planilhas
-└── Dockerfile                        Build usado pelo Render
+├── .github/workflows/ci.yml          Testes automáticos a cada pull request
+└── Dockerfile                        Build da imagem usada na AWS (e no Render)
 ```
 
 ## Executar localmente
@@ -78,26 +80,51 @@ Testes, API, migrações e outros detalhes técnicos estão em [desenvolvimento]
 
 ## Publicação
 
-O Render compila frontend e backend pelo `Dockerfile` da raiz e publica a branch `master`, com os dados no PostgreSQL do Neon.
+O sistema roda na AWS: uma EC2 com Docker executa a aplicação atrás do Caddy, que gera o certificado HTTPS, e os dados ficam em um PostgreSQL no RDS sem acesso público. O endereço `wiestoque.duckdns.org` aponta para o IP elástico da EC2. A configuração completa, passo a passo, está em [Publicação na AWS](docs/AWS.md).
 
-Para atualizar: crie uma branch, abra um pull request para a `master` e faça o merge. O deploy começa sozinho. O build roda todos os testes; se algum falhar, o deploy é interrompido e a versão anterior continua no ar.
+**Testes automáticos:** cada pull request e cada push na `master` rodam os testes do backend no GitHub Actions ([ci.yml](.github/workflows/ci.yml)). Só faça o merge com o check verde.
 
-Variáveis de ambiente do serviço no Render (nunca versione senhas):
+**Para atualizar a versão no ar:** depois do merge na `master`, entre na EC2 pelo SSH e rode:
+
+```bash
+cd ~/WiEstoque_2 && git pull
+cd aws && docker compose up -d --build
+```
+
+O build roda todos os testes; se algum falhar, o container atual continua no ar. Ainda não há deploy automático na AWS.
+
+Variáveis do arquivo `aws/.env` na EC2 (nunca versione senhas; o modelo está em `aws/.env.exemplo`):
 
 | Variável | Uso |
 | --- | --- |
-| `SPRING_PROFILES_ACTIVE` | `prod` |
-| `PORT` | Porta do serviço |
-| `DATABASE_URL` | Endereço JDBC do Neon, com SSL |
+| `DOMINIO` | Endereço público do sistema; o Caddy gera o certificado para ele |
+| `DATABASE_URL` | Endereço JDBC do RDS, com `sslmode=require` |
 | `DATABASE_USER` / `DATABASE_PASSWORD` | Credenciais do banco |
-| `TZ` | `America/Sao_Paulo`; sem ela, o servidor usa UTC e lançamentos após as 21h ficam com a data do dia seguinte |
-| `INITIAL_ADMIN_EMAIL` / `INITIAL_ADMIN_PASSWORD` | Só para criar o primeiro administrador em banco vazio; podem ser removidas depois |
+| `INITIAL_ADMIN_EMAIL` / `INITIAL_ADMIN_PASSWORD` | Só para criar o primeiro administrador em banco vazio; remova depois do primeiro acesso |
 
-No plano gratuito, o serviço "dorme" após 15 minutos sem acesso, e o primeiro acesso seguinte leva cerca de 2 minutos.
+`SPRING_PROFILES_ACTIVE=prod` e `TZ=America/Sao_Paulo` já são definidos no `aws/docker-compose.yml`. Sem o `TZ`, o servidor usaria UTC e lançamentos após as 21h ficariam com a data do dia seguinte.
+
+### Publicação anterior no Render
+
+Antes da AWS, o sistema rodava no Render (https://wiestoque-2.onrender.com), com os dados no Neon, publicado a cada merge na `master`. Os dados foram migrados do Neon para o RDS; o que for lançado no Render não aparece na AWS. No plano gratuito do Render, o serviço "dorme" após 15 minutos sem acesso.
 
 ## Backup
 
-Faça backups periódicos do banco Neon e guarde uma cópia em outro local. As exportações em Excel ou CSV das telas não substituem um backup completo. Antes de migrações ou importações, faça um backup do banco de destino.
+O RDS guarda backups automáticos por apenas 1 dia (limite do plano gratuito). Faça também backups manuais periódicos e guarde uma cópia fora da AWS. Na EC2, dentro de `~/WiEstoque_2/aws`:
+
+```bash
+read -rsp "Senha do RDS: " PGPASSWORD; echo; export PGPASSWORD
+docker run --rm -e PGPASSWORD postgres:17 pg_dump -h ENDPOINT_DO_RDS -U wiestoque -d wiestoque -Fc > backup-$(date +%F).dump
+unset PGPASSWORD
+```
+
+Depois, no PowerShell do seu computador, copie o arquivo para fora da AWS:
+
+```powershell
+scp -i .\wiestoque.pem ubuntu@IP_ELASTICO:~/WiEstoque_2/aws/backup-AAAA-MM-DD.dump .
+```
+
+As exportações em Excel ou CSV das telas não substituem um backup completo. Antes de migrações ou importações, faça um backup do banco de destino.
 
 ## Limitações atuais
 
